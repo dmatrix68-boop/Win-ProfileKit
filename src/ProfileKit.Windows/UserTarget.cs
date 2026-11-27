@@ -19,6 +19,9 @@ public enum UserTargetMode
 
     /// <summary>Default-Profil – gilt für alle künftig angelegten Benutzer.</summary>
     DefaultProfile,
+
+    /// <summary>Benutzer in einem eingebundenen Offline-Image (VHDX einer heruntergefahrenen VM), nur lesend.</summary>
+    OfflineImage,
 }
 
 /// <summary>
@@ -30,7 +33,7 @@ public sealed class UserTarget : IDisposable
 {
     private readonly List<IDisposable> _resources = [];
 
-    private UserTarget(UserContext context, UserTargetMode mode, WindowsRegistryBackend registry)
+    internal UserTarget(UserContext context, UserTargetMode mode, WindowsRegistryBackend registry)
     {
         Context = context;
         Mode = mode;
@@ -39,6 +42,18 @@ public sealed class UserTarget : IDisposable
 
     public UserContext Context { get; }
     public UserTargetMode Mode { get; }
+
+    /// <summary>
+    /// Bei Offline-Images: Profilpfad, wie er im Image-Windows hieß (z. B. <c>C:\Users\max</c>), während
+    /// <see cref="Context"/> auf den eingebundenen Datenträger zeigt. Grundlage für das Umschreiben beim Anwenden.
+    /// </summary>
+    public string? OriginalProfilePath { get; init; }
+
+    /// <summary>Bei Offline-Images: Name des Quellrechners (sonst der aktuelle Rechner).</summary>
+    public string? SourceMachine { get; init; }
+
+    /// <summary>Weitere Aufräumarbeiten beim Freigeben (Hives entladen, Image trennen, Kopien löschen).</summary>
+    internal void AddResource(IDisposable resource) => _resources.Add(resource);
     public IRegistryBackend Registry { get; }
 
     public bool IsCurrentUser => Mode == UserTargetMode.CurrentUser;
@@ -112,6 +127,7 @@ public sealed class UserTarget : IDisposable
     public string Describe() => Mode switch
     {
         UserTargetMode.DefaultProfile => $"Default ({Context.ProfilePath})",
+        UserTargetMode.OfflineImage => $"{Context.UserName}@{SourceMachine} ({OriginalProfilePath} → {Context.ProfilePath})",
         _ => $"{Context.UserName} ({Context.ProfilePath})",
     };
 

@@ -9,6 +9,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -27,7 +28,25 @@
             <ProgressRing x:Name="InventoryRing" IsActive="False" Width="20" Height="20" VerticalAlignment="Bottom" />
         </StackPanel>
 
-        <ListView x:Name="ModuleList" Grid.Row="2" SelectionMode="None" BorderThickness="1"
+        <Expander Grid.Row="2" Header="{l:Loc Key=ui-vhdx-header}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+            <StackPanel Spacing="8">
+                <TextBlock Text="{l:Loc Key=ui-vhdx-text}" TextWrapping="Wrap" />
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="200" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="VhdxBox" Header="{l:Loc Key=ui-vhdx-file}" PlaceholderText="D:\Hyper-V\Test-VM\Virtual Hard Disks\Test-VM.vhdx" />
+                    <Button Grid.Column="1" Content="{l:Loc Key=ui-browse}" Click="BrowseVhdx_Click" VerticalAlignment="Bottom" />
+                    <TextBox Grid.Column="2" x:Name="VhdxUserBox" Header="{l:Loc Key=ui-vhdx-user}" />
+                    <Button Grid.Column="3" Content="{l:Loc Key=ui-vhdx-users}" Click="VhdxUsers_Click" VerticalAlignment="Bottom" />
+                </Grid>
+            </StackPanel>
+        </Expander>
+
+        <ListView x:Name="ModuleList" Grid.Row="3" SelectionMode="None" BorderThickness="1"
                   BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="4">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="s:SelectableItem">
@@ -41,7 +60,7 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <Grid Grid.Row="3" ColumnSpacing="8">
+        <Grid Grid.Row="4" ColumnSpacing="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />

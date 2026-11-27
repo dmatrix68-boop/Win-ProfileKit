@@ -191,5 +191,56 @@ Invoke-Pk @('apply', '--profile', $collected, '--current-user', '--installed-onl
 & $Exe apply --profile $collected --current-user --installed-only --install --dry-run --lang de 2>&1 | Out-Null
 Assert-True ($LASTEXITCODE -eq 3) '--installed-only und --install schließen sich aus'
 
+# --- VHDX einer (simulierten) heruntergefahrenen VM ---------------------------------------
+$vhdx = Join-Path $Work 'smoke-vm.vhdx'
+$dp = Join-Path $Work 'diskpart.txt'
+"create vdisk file=""$vhdx"" maximum=256 type=expandable`r`nselect vdisk file=""$vhdx""`r`nattach vdisk" | Set-Content $dp -Encoding ASCII
+diskpart /s $dp | Out-Null
+$disk = Get-DiskImage -ImagePath $vhdx | Get-Disk
+Initialize-Disk -Number $disk.Number -PartitionStyle MBR
+$part = New-Partition -DiskNumber $disk.Number -UseMaximumSize -AssignDriveLetter
+Format-Volume -Partition $part -FileSystem NTFS -NewFileSystemLabel SMOKEVM -Confirm:$false | Out-Null
+$vm = "$((Get-Partition -DiskNumber $disk.Number | Get-Volume | Where-Object DriveLetter | Select-Object -First 1).DriveLetter):\"
+Write-Host "Test-VHDX eingebunden als $vm"
+
+# Windows-Gerüst mit echtem SOFTWARE-Hive und NTUSER.DAT
+New-Item (Join-Path $vm 'Windows\System32\config') -ItemType Directory -Force | Out-Null
+reg add "HKLM\SOFTWARE\PK_FAKE_SW\Microsoft\Windows\CurrentVersion\Uninstall\SmokeApp" /v DisplayName /d "Smoke test App 1.0" /f | Out-Null
+reg add "HKLM\SOFTWARE\PK_FAKE_SW\Microsoft\Windows NT\CurrentVersion\ProfileList\S-1-5-21-1-2-3-1001" /v ProfileImagePath /t REG_EXPAND_SZ /d "%SystemDrive%\Users\vmuser" /f | Out-Null
+reg add "HKLM\SOFTWARE\PK_FAKE_SW\ProfileKitSmokeHKLM" /v Mode /d "aus-dem-image" /f | Out-Null
+reg save "HKLM\SOFTWARE\PK_FAKE_SW" (Join-Path $vm 'Windows\System32\config\SOFTWARE') /y | Out-Null
+reg delete "HKLM\SOFTWARE\PK_FAKE_SW" /f | Out-Null
+
+$vmProfile = Join-Path $vm 'Users\vmuser'
+New-Item (Join-Path $vmProfile 'AppData\Roaming\ProfileKitSmoke') -ItemType Directory -Force | Out-Null
+Set-Content (Join-Path $vmProfile 'AppData\Roaming\ProfileKitSmoke\conf.ini') 'last=C:\Users\vmuser\Documents' -Encoding Unicode
+reg add "HKCU\PK_FAKE_USER\Software\ProfileKitSmoke" /v LastDir /d "C:\Users\vmuser\Downloads" /f | Out-Null
+reg save "HKCU\PK_FAKE_USER" (Join-Path $vmProfile 'NTUSER.DAT') /y | Out-Null
+reg delete "HKCU\PK_FAKE_USER" /f | Out-Null
+Dismount-DiskImage -ImagePath $vhdx | Out-Null
+
+Invoke-Pk @('vhdx', 'users', '--vhdx', $vhdx)
+$vmShare = Join-Path $Work 'vmshare'
+Invoke-Pk @('collect', '--vhdx', $vhdx, '--user', 'vmuser', '--out', $vmShare, '--only', 'smoke.test') -Allowed 0,2
+$vmProfileOut = Join-Path $vmShare 'smoke-vm_vmuser'
+Assert-True (-not (Get-DiskImage -ImagePath $vhdx).Attached) 'VHDX: nach dem Sammeln wieder getrennt'
+if (Test-Path (Join-Path $vmProfileOut 'profile.json')) {
+    $vmManifest = Get-Content (Join-Path $vmProfileOut 'profile.json') -Raw | ConvertFrom-Json
+    Assert-True ($vmManifest.source.profilePath -eq 'C:\Users\vmuser') "VHDX: Originalpfad im Manifest ($($vmManifest.source.profilePath))"
+    Assert-True ($vmManifest.source.machine -eq 'smoke-vm') "VHDX: Rechnername aus dem Dateinamen ($($vmManifest.source.machine))"
+    $vmReg = Get-Content (Join-Path $vmProfileOut 'modules\smoke.test\registry.json') -Raw
+    Assert-True ($vmReg -like '*C:\\Users\\vmuser\\Downloads*') 'VHDX: HKCU aus dem NTUSER.DAT des Images'
+    Assert-True ($vmReg -like '*aus-dem-image*') 'VHDX: HKLM aus dem SOFTWARE-Hive des Images'
+    Assert-True (Test-Path (Join-Path $vmProfileOut 'modules\smoke.test\files\APPDATA\ProfileKitSmoke\conf.ini')) 'VHDX: Datei aus dem Image erfasst'
+    $vmInv = Get-Content (Join-Path $vmProfileOut 'inventory.json') -Raw | ConvertFrom-Json
+    Assert-True ($vmInv.programs.name -contains 'Smoke test App 1.0') 'VHDX: Inventar aus dem Image'
+
+    Invoke-Pk @('apply', '--profile', $vmProfileOut, '--user', $user) -Allowed 0,2
+    $rewritten = Get-Content (Join-Path $target 'AppData\Roaming\ProfileKitSmoke\conf.ini') -Raw -Encoding Unicode
+    Assert-True ($rewritten -like "*$target\Documents*") "VHDX: Pfad beim Anwenden umgeschrieben ($($rewritten.Trim()))"
+} else {
+    Assert-True $false 'VHDX: Profil geschrieben'
+}
+
 if ($failures -gt 0) { Write-Host "`n$failures Fehler" -ForegroundColor Red; exit 1 }
 Write-Host "`nAlle Smoke-Tests bestanden." -ForegroundColor Green

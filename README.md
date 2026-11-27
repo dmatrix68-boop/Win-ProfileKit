@@ -9,7 +9,7 @@ Testbenutzer auf Installations-VMs und für den OEM-Skriptlauf
 ([OEM-script-gen](https://github.com/dmatrix68-boop/OEM-script-gen)).
 
 > Status: Core + CLI, Lernmodus, MCP-Server, KI-Anbindung und WinUI-3-Oberfläche.
-> VHDX-Quelle und Einbindung in den OEM-Skriptgenerator folgen – siehe [SPEC.md](SPEC.md).
+> Einbindung in den OEM-Skriptgenerator folgt – siehe [SPEC.md](SPEC.md).
 
 ## Funktionen (Phase 1)
 
@@ -65,6 +65,10 @@ profilekit apply --profile \\nas\profile\Dev --create-user test1 --admin --insta
 profilekit compare --profile \\nas\profile\ALT-PC_max
 profilekit apply --profile \\nas\profile\ALT-PC_max --current-user --install
 profilekit apply --profile \\nas\profile\ALT-PC_max --current-user --installed-only
+
+:: aus der VHDX einer heruntergefahrenen Hyper-V-VM (als Administrator)
+profilekit vhdx users --vhdx "D:\Hyper-V\Test-VM\Virtual Hard Disks\Test-VM.vhdx"
+profilekit collect --vhdx "D:\Hyper-V\Test-VM\Virtual Hard Disks\Test-VM.vhdx" --user test1 --out \\nas\profile
 
 :: im OEM-Lauf (Phase 2, Benutzerkontext)
 profilekit apply --profile C:\Install\ProfileKit\Profiles\Dev --current-user --install

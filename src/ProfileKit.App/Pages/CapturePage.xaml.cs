@@ -82,6 +82,31 @@ public sealed partial class CapturePage : Page
         if (await Pickers.PickFolderAsync(App.Window!) is { } folder) FolderBox.Text = folder;
     }
 
+    /// <summary>Quelle: aktueller/anderer Benutzer oder – wenn eine VHDX angegeben ist – Benutzer im Image.</summary>
+    private void AddSourceArgs(List<string> args)
+    {
+        if (!string.IsNullOrWhiteSpace(VhdxBox.Text))
+        {
+            args.Add("--vhdx"); args.Add(VhdxBox.Text.Trim());
+            if (!string.IsNullOrWhiteSpace(VhdxUserBox.Text)) { args.Add("--user"); args.Add(VhdxUserBox.Text.Trim()); }
+        }
+        else if (SourceBox.SelectedIndex > 0 && SourceBox.SelectedItem is string user)
+        {
+            args.Add("--user"); args.Add(user);
+        }
+    }
+
+    private async void BrowseVhdx_Click(object sender, RoutedEventArgs e)
+    {
+        if (await Pickers.PickFileAsync(App.Window!, ".vhdx", ".avhdx", ".vhd") is { } file) VhdxBox.Text = file;
+    }
+
+    private async void VhdxUsers_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(VhdxBox.Text)) return;
+        await App.Window!.RunCliAsync(["vhdx", "users", "--vhdx", VhdxBox.Text.Trim()]);
+    }
+
     /// <summary>Sammler: alle installierten Programme mit Regel + Windows + Inventar (SPEC 4.6).</summary>
     private async void Collect_Click(object sender, RoutedEventArgs e)
     {
@@ -91,7 +116,7 @@ public sealed partial class CapturePage : Page
         if (string.IsNullOrEmpty(parent) || string.IsNullOrEmpty(leaf)) { await App.Window!.ShowMessageAsync(Localizer.T("ui-capture-title"), Localizer.T("ui-no-folder")); return; }
 
         var args = new List<string> { "collect", "--out", parent, "--name", leaf };
-        if (SourceBox.SelectedIndex > 0 && SourceBox.SelectedItem is string user) { args.Add("--user"); args.Add(user); }
+        AddSourceArgs(args);
         if (ZipBox.IsChecked == true) args.Add("--zip");
         (UiSettings.Load() with { LastProfileFolder = parent }).Save();
         await App.Window!.RunCliAsync(args);
@@ -104,7 +129,7 @@ public sealed partial class CapturePage : Page
         if (string.IsNullOrWhiteSpace(FolderBox.Text)) { await App.Window!.ShowMessageAsync(Localizer.T("ui-capture-title"), Localizer.T("ui-no-folder")); return; }
 
         var args = new List<string> { "capture", "--out", FolderBox.Text.Trim(), "--name", string.IsNullOrWhiteSpace(NameBox.Text) ? "Profil" : NameBox.Text.Trim(), "--modules", string.Join(',', selected) };
-        if (SourceBox.SelectedIndex > 0 && SourceBox.SelectedItem is string user) { args.Add("--user"); args.Add(user); }
+        AddSourceArgs(args);
         if (ZipBox.IsChecked == true) args.Add("--zip");
 
         var parent = Path.GetDirectoryName(FolderBox.Text.Trim());

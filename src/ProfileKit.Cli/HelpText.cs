@@ -16,11 +16,13 @@ internal static class HelpText
           capture --out <Ordner> --name <Name> (--modules a,b | --installed) [--user <Name>] [--zip]
                                           Profil erfassen; Module als Liste oder Muster (windows.*),
                                           --installed = alle installierten Programme mit Regel
-          collect --out <Ordner|\\Server\Freigabe> [--user <Name>] [--name <Name>] [--only <Muster>] [--no-windows] [--zip]
+          collect --out <Ordner|\\Server\Freigabe> [--user <Name>] [--vhdx <Datei>] [--name <Name>] [--only <Muster>] [--no-windows] [--zip]
                                           Sammler für den Quellrechner (auch direkt von einer Freigabe):
                                           alle installierten Programme mit Regel + Windows + Inventar
           compare --profile <Ordner|.pkprofile>
                                           Abgleich mit diesem Rechner: installiert / installierbar / fehlt
+          vhdx users --vhdx <Datei>       Benutzer in der VHDX einer heruntergefahrenen VM anzeigen;
+                                          capture/collect lesen mit --vhdx <Datei> [--user <Name>] aus dem Image
           info --profile <Ordner|.pkprofile>
                                           Inhalt eines Profils anzeigen
           apply --profile <Ordner|.pkprofile>
@@ -76,11 +78,13 @@ internal static class HelpText
           capture --out <folder> --name <name> (--modules a,b | --installed) [--user <name>] [--zip]
                                           capture a profile; modules as list or pattern (windows.*),
                                           --installed = every installed program that has a rule
-          collect --out <folder|\\server\share> [--user <name>] [--name <name>] [--only <pattern>] [--no-windows] [--zip]
+          collect --out <folder|\\server\share> [--user <name>] [--vhdx <file>] [--name <name>] [--only <pattern>] [--no-windows] [--zip]
                                           collector for the source computer (also straight from a share):
                                           every installed program with a rule + Windows + inventory
           compare --profile <folder|.pkprofile>
                                           compare with this computer: installed / installable / missing
+          vhdx users --vhdx <file>        list users in the VHDX of a shut-down VM;
+                                          capture/collect read from the image with --vhdx <file> [--user <name>]
           info --profile <folder|.pkprofile>
                                           show the contents of a profile
           apply --profile <folder|.pkprofile>

@@ -97,8 +97,57 @@ internal sealed class Commands(CliArgs args)
             Console.Error.WriteLine(T("warning", T("module-unknown", id)));
         if (rules.Count == 0) { Console.Error.WriteLine(T("no-modules")); return ExitCodes.Error; }
 
-        using var source = args.Get("user") is { } user ? UserTarget.OpenUser(user, writable: false) : UserTarget.OpenCurrent();
-        return CaptureRules(source, outDir, name, rules, versions, inventory: null);
+        var (source, image) = OpenSource();
+        try
+        {
+            return CaptureRules(source, outDir, name, rules, versions, inventory: null);
+        }
+        finally
+        {
+            source.Dispose();
+            image?.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Quelle für capture/collect: aktueller Benutzer, anderer Benutzer (--user) oder Benutzer in einer VHDX
+    /// einer heruntergefahrenen VM (--vhdx [--user]). Der Aufrufer gibt beides frei (erst Quelle, dann Image).
+    /// </summary>
+    private (UserTarget Source, VhdxImage? Image) OpenSource()
+    {
+        if (args.Get("vhdx") is not { } vhdx)
+            return (args.Get("user") is { } u ? UserTarget.OpenUser(u, writable: false) : UserTarget.OpenCurrent(), null);
+
+        var checkpoints = OfflineImageLayout.CheckpointFiles(vhdx);
+        if (checkpoints.Count > 0) Console.Error.WriteLine(T("warning", T("vhdx-checkpoint", string.Join(", ", checkpoints.Select(Path.GetFileName)))));
+        Console.WriteLine(T("vhdx-mounting", vhdx));
+        var image = VhdxImage.Mount(vhdx);
+        try
+        {
+            Console.WriteLine(T("vhdx-mounted", image.Root, image.MachineName, string.Join(", ", image.Users.Select(x => x.UserName))));
+            var name = args.Get("user")
+                ?? (image.Users.Count == 1 ? image.Users[0].UserName : throw new CliException(T("vhdx-user-required", string.Join(", ", image.Users.Select(x => x.UserName)))));
+            return (image.OpenUser(name), image);
+        }
+        catch
+        {
+            image.Dispose();
+            throw;
+        }
+    }
+
+    // ----------------------------------------------------------------- vhdx
+
+    /// <summary><c>vhdx users --vhdx &lt;Datei&gt;</c>: Benutzer im Image anzeigen.</summary>
+    public int VhdxUsers()
+    {
+        var vhdx = args.Require("vhdx");
+        Console.WriteLine(T("vhdx-mounting", vhdx));
+        using var image = VhdxImage.Mount(vhdx);
+        Console.WriteLine(T("vhdx-mounted", image.Root, image.MachineName, image.Users.Count));
+        Console.WriteLine(T("vhdx-users-header"));
+        foreach (var u in image.Users) Console.WriteLine($"{u.UserName,-24} {u.OriginalProfilePath,-33} {u.MountedProfilePath}");
+        return ExitCodes.Ok;
     }
 
     /// <summary>Gemeinsamer Kern von capture und collect: Module erfassen, Manifest, LIESMICH, optional Archiv.</summary>
@@ -126,10 +175,11 @@ internal sealed class Commands(CliArgs args)
             ToolVersion = ToolVersion,
             Source = new SourceInfo
             {
-                Machine = Environment.MachineName,
+                Machine = source.SourceMachine ?? Environment.MachineName,
                 UserName = source.Context.UserName,
                 Sid = source.Context.Sid,
-                ProfilePath = source.Context.ProfilePath,
+                // Beim Offline-Image der Pfad im Image-Windows – nur so stimmt das Umschreiben beim Anwenden
+                ProfilePath = source.OriginalProfilePath ?? source.Context.ProfilePath,
             },
             Modules = entries,
         };
@@ -159,15 +209,34 @@ internal sealed class Commands(CliArgs args)
     {
         var outRoot = args.Require("out");
         var catalog = LoadCatalog();
-        using var source = args.Get("user") is { } user ? UserTarget.OpenUser(user, writable: false) : UserTarget.OpenCurrent();
-
-        IReadOnlyList<InstalledPackage> winget = [];
-        try { winget = new WingetClient().ListInstalled(); }
-        catch (Exception ex) when (ex is InvalidOperationException or IOException or TimeoutException or System.ComponentModel.Win32Exception)
+        var (source, image) = OpenSource();
+        try
         {
-            Console.Error.WriteLine(T("warning", T("collect-no-winget", ex.Message)));
+            return CollectFrom(source, catalog, outRoot);
         }
-        var programs = UninstallInventory.Read(source.Registry, source.Context);
+        finally
+        {
+            source.Dispose();
+            image?.Dispose();
+        }
+    }
+
+    private int CollectFrom(UserTarget source, RuleCatalog catalog, string outRoot)
+    {
+        IReadOnlyList<InstalledPackage> winget = [];
+        if (source.Mode == UserTargetMode.OfflineImage)
+        {
+            Console.WriteLine(T("vhdx-no-winget"));
+        }
+        else
+        {
+            try { winget = new WingetClient().ListInstalled(); }
+            catch (Exception ex) when (ex is InvalidOperationException or IOException or TimeoutException or System.ComponentModel.Win32Exception)
+            {
+                Console.Error.WriteLine(T("warning", T("collect-no-winget", ex.Message)));
+            }
+        }
+        var programs = UninstallInventory.Read(source.Registry, source.Mode == UserTargetMode.OfflineImage ? null : source.Context);
         Console.WriteLine(T("collect-inventory", winget.Count, programs.Count));
 
         var rules = InventoryMatcher.RulesForInstalled(catalog.Rules, winget, programs).ToList();
@@ -176,12 +245,13 @@ internal sealed class Commands(CliArgs args)
         rules = rules.Where(r => filter.Matches(r.Id)).OrderBy(r => r.Id, StringComparer.OrdinalIgnoreCase).ToList();
         if (rules.Count == 0) { Console.Error.WriteLine(T("no-modules")); return ExitCodes.Error; }
 
-        var name = args.Get("name") ?? $"{Environment.MachineName}_{source.Context.UserName}";
+        var machine = source.SourceMachine ?? Environment.MachineName;
+        var name = args.Get("name") ?? $"{machine}_{source.Context.UserName}";
         if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new CliException(T("invalid-name", name));
         var outDir = Path.Combine(outRoot, name);
         var inventory = new MachineInventory
         {
-            Machine = Environment.MachineName,
+            Machine = machine,
             UserName = source.Context.UserName,
             Winget = winget.ToList(),
             Programs = programs.ToList(),

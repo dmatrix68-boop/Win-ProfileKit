@@ -15,17 +15,24 @@ public sealed class WindowsRegistryBackend : IRegistryBackend, IDisposable
     private readonly RegistryKey _userRoot;
     private readonly RegistryKey? _classesRoot;
     private readonly RegistryKey _machineRoot;
+    private readonly RegistryKey? _offlineSoftware;
     private readonly bool _ownsUserRoot;
 
     /// <param name="userRoot">Wurzel für HKCU, z. B. <see cref="Microsoft.Win32.Registry.CurrentUser"/> oder HKU\&lt;Mount&gt;.</param>
     /// <param name="classesRoot">Bei offline geladenen Hives: separat geladene UsrClass.dat für HKCU\Software\Classes.</param>
-    public WindowsRegistryBackend(RegistryKey userRoot, RegistryKey? classesRoot = null, bool ownsUserRoot = false)
+    /// <param name="offlineSoftware">Bei Offline-Images: geladener SOFTWARE-Hive des Images. HKLM\SOFTWARE\… liest dann
+    /// daraus statt vom laufenden System; andere HKLM-Bereiche sind nicht verfügbar.</param>
+    public WindowsRegistryBackend(RegistryKey userRoot, RegistryKey? classesRoot = null, bool ownsUserRoot = false, RegistryKey? offlineSoftware = null)
     {
         _userRoot = userRoot;
         _classesRoot = classesRoot;
         _ownsUserRoot = ownsUserRoot;
+        _offlineSoftware = offlineSoftware;
         _machineRoot = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
     }
+
+    /// <summary>Liest bzw. schreibt ein Offline-Image (HKLM\SOFTWARE aus dem Image)?</summary>
+    public bool IsOfflineImage => _offlineSoftware is not null;
 
     public static WindowsRegistryBackend ForCurrentUser() => new(Microsoft.Win32.Registry.CurrentUser);
 
@@ -69,6 +76,7 @@ public sealed class WindowsRegistryBackend : IRegistryBackend, IDisposable
     public void Write(CoreRegistryValue value)
     {
         var (root, sub) = Resolve(RegistryPath.Normalize(value.Key));
+        if (root is null) throw new UnauthorizedAccessException($"Im Offline-Image nicht verfügbar: {value.Key}");
         using var k = root.CreateSubKey(sub, writable: true)
             ?? throw new IOException($"Schlüssel konnte nicht angelegt werden: {value.Key}");
         switch (value.Kind)
@@ -100,13 +108,22 @@ public sealed class WindowsRegistryBackend : IRegistryBackend, IDisposable
     private RegistryKey? Open(string normalizedKey, bool writable)
     {
         var (root, sub) = Resolve(normalizedKey);
-        return sub.Length == 0 ? root.OpenSubKey(string.Empty, writable) : root.OpenSubKey(sub, writable);
+        if (root is null) return null;
+        return root.OpenSubKey(sub, writable);
     }
 
-    private (RegistryKey Root, string SubKey) Resolve(string normalizedKey)
+    private (RegistryKey? Root, string SubKey) Resolve(string normalizedKey)
     {
         var (root, sub) = RegistryPath.Split(normalizedKey);
-        if (root == RegistryPath.LocalMachine) return (_machineRoot, sub);
+        if (root == RegistryPath.LocalMachine)
+        {
+            if (_offlineSoftware is null) return (_machineRoot, sub);
+            const string software = "SOFTWARE";
+            if (sub.Equals(software, StringComparison.OrdinalIgnoreCase)) return (_offlineSoftware, string.Empty);
+            return sub.StartsWith(software + "\\", StringComparison.OrdinalIgnoreCase)
+                ? (_offlineSoftware, sub[(software.Length + 1)..])
+                : (null, sub); // nur SOFTWARE aus dem Image verfügbar
+        }
         if (_classesRoot is not null && (sub.Equals(ClassesPrefix, StringComparison.OrdinalIgnoreCase)
             || sub.StartsWith(ClassesPrefix + "\\", StringComparison.OrdinalIgnoreCase)))
             return (_classesRoot, sub[ClassesPrefix.Length..].TrimStart('\\'));
@@ -155,6 +172,7 @@ public sealed class WindowsRegistryBackend : IRegistryBackend, IDisposable
     {
         if (_ownsUserRoot) _userRoot.Dispose();
         _classesRoot?.Dispose();
+        _offlineSoftware?.Dispose();
         _machineRoot.Dispose();
     }
 }

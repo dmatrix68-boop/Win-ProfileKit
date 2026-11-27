@@ -178,8 +178,21 @@ Version 1. Live-Aktivierung über `postApply`-Hinweise der Module.
    installierbar / fehlt. Danach entweder **Quelle bestimmt** (`apply --install`: Fehlendes
    installieren, alles konfigurieren) oder **Ziel bestimmt** (`apply --installed-only`: nur
    Einstellungen für Programme, die dort schon installiert sind).
-3. **Offline-Datenträger** – VHDX einer heruntergefahrenen Hyper-V-VM wird
-   schreibgeschützt eingebunden; Hives (`NTUSER.DAT`, `SOFTWARE`) werden offline geladen.
+3. **Offline-Datenträger** ✅ – VHDX/AVHDX/VHD einer heruntergefahrenen Hyper-V-VM:
+   `profilekit vhdx users --vhdx <Datei>` zeigt die Benutzer, `collect`/`capture` lesen mit
+   `--vhdx <Datei> [--user <Name>]` aus dem Image. Ablauf:
+   * Einbinden **schreibgeschützt** über `Mount-DiskImage` (kein Hyper-V-Modul nötig, Adminrechte);
+     war das Image schon eingebunden, bleibt es das danach auch.
+   * Hives (`SOFTWARE`, `NTUSER.DAT`, `UsrClass.dat` samt `.LOG1/.LOG2`) werden in einen temporären
+     Ordner kopiert und von dort geladen – von schreibgeschützten Datenträgern lassen sie sich nicht laden.
+   * Benutzer aus der `ProfileList` des Images (echte Profilpfade) bzw. `\Users\*` mit `NTUSER.DAT`.
+   * Dateien werden vom eingebundenen Datenträger gelesen; im Manifest steht der Profilpfad **im
+     Image-Windows** (`C:\Users\…`), damit das Umschreiben beim Anwenden stimmt.
+   * `HKLM\SOFTWARE\…` kommt aus dem SOFTWARE-Hive des Images, nicht vom Host.
+   * Inventar aus den Uninstall-Einträgen des Images (winget ist offline nicht verfügbar).
+   * Rechnername = Dateiname der VHDX ohne Prüfpunkt-GUID. Hat die VM Prüfpunkte, warnt das Tool:
+     den aktuellen Stand enthält die neueste `.avhdx`.
+   * Läuft die VM noch (Datei gesperrt), bricht das Einbinden mit Hinweis ab.
 4. **Reine Freigabe** (`\\rechner\C$`) – nur Dateien; Registry nur, wenn der Benutzer
    dort abgemeldet ist. Installierte Programme werden aus Programmordnern,
    Startmenü und AppData abgeleitet (KI-gestützt).
@@ -314,6 +327,7 @@ profilekit capture  --out <Ordner> --name <Name> (--modules a,b | --installed)
                     [--user <Name>]
 profilekit collect  --out <Ordner|\\Server\Freigabe> [--user <Name>] [--name <Name>] [--only <Muster>] [--no-windows] [--zip]
 profilekit compare  --profile <Ordner>
+profilekit vhdx users --vhdx <Datei>       (capture/collect zusätzlich mit --vhdx <Datei> [--user <Name>])
 profilekit info     --profile <Ordner>
 profilekit apply    --profile <Ordner>
                     (--current-user | --user <Name> | --default-user | --create-user <Name>)
@@ -335,7 +349,7 @@ Global: --lang de|en, --rules <Ordner>, --verbose
 | Phase | Inhalt |
 |---|---|
 | **1** | Core, Windows-Schicht, CLI: Katalog, Inventar, Capture, Apply (alle Zielarten), Benutzer anlegen, Windows-Module, CI |
-| **2** | Lernmodus ✅, Sammler über Freigabe ✅, Abgleich Quelle/Ziel ✅, Offline-VHDX |
+| **2** | Lernmodus ✅, Sammler über Freigabe ✅, Abgleich Quelle/Ziel ✅, Offline-VHDX ✅ |
 | **3** | MCP-Server ✅, KI-Stufen 1a (Claude Desktop) ✅ / 1b (Claude Code) ✅ / 2 ✅ / 3 ✅, Regelvorschläge mit Validierung ✅ |
 | **4** | WinUI-3-Oberfläche (DE/EN) ✅ – Übersicht, Erfassen, Anwenden, Lernmodus, KI-Suche mit Vorschlägen, Einstellungen |
 | **5** | Integration in den OEM-Skriptgenerator (eigener PR dort) |
