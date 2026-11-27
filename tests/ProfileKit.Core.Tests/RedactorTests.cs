@@ -68,7 +68,7 @@ public class RedactorTests
         Assert.Equal(new byte[] { 0xFF, 0xFE }, result.Bytes[..2]);
         Assert.Equal("[Generic]\r\nTheme=1\r\n", enc.GetString(result.Bytes, 2, result.Bytes.Length - 2));
 
-        Assert.Null(Redactor.Redact([1, 0, 2, 0, 0, 0, 3, 0, 9], [rule]));
+        Assert.Throws<RedactionException>(() => Redactor.Redact([1, 0, 2, 0, 0, 0, 3, 0, 9], [rule]));  // binär → fail closed
         Assert.Null(Redactor.Redact(Encoding.UTF8.GetBytes("[A]\nTheme=1\n"), [rule]));
         Assert.Equal(DeepLSettings, Redactor.RedactJson(DeepLSettings, ["Fehlt.Gibts.Nicht"], ref Unused));
     }
@@ -128,6 +128,48 @@ public class RedactorTests
         {
             Id = "x", DisplayName = "X", Redact = [new RedactRule { File = "a.config", Xml = ["//[kaputt"] }],
         }));
+    }
+
+    [Fact]
+    public void Xml_like_file_with_several_root_elements()
+    {
+        // wie RegistryFinder.config: kein gültiges XML-Dokument, sondern mehrere Wurzelelemente
+        var text = "<WindowPlacement x=\"1\" />\r\n<ForceDarkMode>true</ForceDarkMode>\r\n" +
+                   "<RecentFindThats><Item>ABCD-EFGH-1234</Item><Item>HKLM\\SOFTWARE</Item></RecentFindThats>\r\n" +
+                   "<SearchParams><FindThat>geheim</FindThat><MatchCase>false</MatchCase></SearchParams>\r\n";
+        var removed = 0;
+        var result = Redactor.RedactXml(text, ["//RecentFindThats", "//SearchParams/FindThat"], ref removed);
+        Assert.Equal(2, removed);
+        Assert.DoesNotContain("ABCD-EFGH", result);
+        Assert.DoesNotContain("geheim", result);
+        Assert.Contains("<ForceDarkMode>true</ForceDarkMode>", result);
+        Assert.Contains("<MatchCase>false</MatchCase>", result);
+        Assert.DoesNotContain("__profilekit", result);
+        Assert.StartsWith("<WindowPlacement", result);
+    }
+
+    [Fact]
+    public void Unreadable_file_with_redact_rule_is_not_captured()
+    {
+        using var root = new TempRoot();
+        var user = root.User("max");
+        var dir = PathTokens.Expand(@"%APPDATA%\Tool", user);
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(Path.Combine(dir, "settings.json"), "{ kaputt: \"token\" ");   // kein gültiges JSON
+        File.WriteAllText(Path.Combine(dir, "other.ini"), "a=1");
+        var rule = new ModuleRule
+        {
+            Id = "tool", DisplayName = "Tool",
+            Files = [new FileRule { Path = @"%APPDATA%\Tool" }],
+            Redact = [new RedactRule { File = "settings.json", Json = ["**.Token"] }],
+        };
+        var package = new ProfilePackage(Path.Combine(root.Path, "p"));
+        var result = new CaptureService().CaptureModule(package, rule, user, new MemoryRegistryBackend());
+
+        Assert.Equal(1, result.Entry.FileCount);
+        Assert.False(File.Exists(package.PackagedPathFor("tool", @"%APPDATA%\Tool\settings.json")));
+        Assert.True(File.Exists(package.PackagedPathFor("tool", @"%APPDATA%\Tool\other.ini")));
+        Assert.Contains(result.Warnings, w => w.Contains("settings.json"));
     }
 
     [Fact]

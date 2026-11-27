@@ -131,6 +131,33 @@ public static class ProposalValidator
             }
         }
 
+        // redact probehalber auf die echten Dateien anwenden – was sich nicht bereinigen lässt, würde nicht erfasst
+        if (rule.Redact.Count > 0)
+        {
+            foreach (var file in rule.Files)
+            {
+                string absolute;
+                try { absolute = guard.ResolvePath(file.Path).Absolute; } catch (UnauthorizedAccessException) { continue; }
+                IEnumerable<(string Abs, string Rel)> candidates =
+                    File.Exists(absolute) ? [(absolute, Path.GetFileName(absolute))]
+                    : Directory.Exists(absolute) ? Directory.EnumerateFiles(absolute, "*", new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true })
+                        .Select(f => (f, Path.GetRelativePath(absolute, f))).Where(c => !excludes.IsExcluded(c.Item2)).Take(5000)
+                    : [];
+                foreach (var (abs, rel) in candidates)
+                {
+                    var rules = Text.Redactor.RulesFor(rule.Redact, rel);
+                    if (rules.Count == 0) continue;
+                    try
+                    {
+                        var result = Text.Redactor.Redact(File.ReadAllBytes(abs), rules);
+                        if (result is null) v.Warnings.Add($"redact for {rel}: nothing matched – check the paths/keys.");
+                    }
+                    catch (Text.RedactionException ex) { v.Errors.Add($"redact cannot be applied to {rel}: {ex.Message}"); }
+                    catch (IOException) { }
+                }
+            }
+        }
+
         foreach (var reg in rule.Registry)
         {
             string key;

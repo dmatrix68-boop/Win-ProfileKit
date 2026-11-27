@@ -1,0 +1,19 @@
+{
+  "id": "registryfinder",
+  "displayName": "Registry Finder",
+  "wingetId": "SergeyFilippov.RegistryFinder",
+  "files": [ { "path": "%APPDATA%\\RegistryFinder" } ],
+  "excludes": [ "UndoHistory\\**", "VisitationHistory\\**", "*.log", "*.dmp" ],
+  "redact": [
+    {
+      "file": "RegistryFinder.config",
+      "xml": [
+        "//RecentFindThats", "//RecentSearchScopes", "//SearchParams/FindThat", "//SearchParams/SearchScope",
+        "//ReplaceParams/FindThat", "//ReplaceParams/ReplaceWith", "//RegistryDocuments/Registry/LastKey"
+      ]
+    }
+  ],
+  "processes": [ "RegistryFinder" ],
+  "origin": "Catalog",
+  "notes": "Per 'profilekit ai discover' ermittelt und auf einem echten System geprüft (Registry Finder 2.62). Alle Einstellungen in %APPDATA%\\RegistryFinder: RegistryFinder.config (XML-artig mit mehreren Wurzelelementen: Fensterposition, Spalten, Suchoptionen, Schrift, Darkmode, Update-Prüfung), favorites.txt (Favoriten), RegistryFinder_lang.ini/.dll (Übersetzung). Ausgeschlossen: UndoHistory und VisitationHistory (Verlauf). Beim Erfassen entfernt: Suchverlauf (RecentFindThats – enthielt einen produktschlüsselartigen Eintrag), letzte Suchbereiche, aktuelle Such-/Ersetzbegriffe und LastKey. Lässt sich die Datei nicht bereinigen, wird sie nicht übernommen. HKLM\\SOFTWARE\\RegistryFinder enthält nur InstallPath. Freeware, keine Lizenzdatei."
+}

@@ -85,7 +85,12 @@ nie im Profil. Die Regel nennt sie im Feld `redact`:
 
 `file` ist ein Glob relativ zum Dateieintrag; `ini` nennt Schlüssel (optional `Abschnitt.Schlüssel`),
 `json` Pfade mit Punkt (`**.Name` = in jeder Tiefe, Name als Glob), `xml` XPath-Ausdrücke
-(z. B. `//setting[@name='RecentFindThats']`, `//proxy/@password`). Kodierung und BOM bleiben
+(z. B. `//setting[@name='RecentFindThats']`, `//proxy/@password`; auch für XML-artige Dateien mit
+mehreren Wurzelelementen).
+
+**Fail closed:** Lässt sich eine Datei, für die eine `redact`-Regel gilt, nicht lesen (kein gültiges
+JSON/XML, Binärdatei), wird sie **nicht** ins Profil übernommen und es gibt eine Warnung. `propose_rule`
+wendet `redact` probehalber auf die echten Dateien an und lehnt Vorschläge ab, bei denen das scheitert. Kodierung und BOM bleiben
 erhalten; Binärdateien werden nicht verändert. Die Zahl entfernter Einträge steht je Modul im
 Manifest (`redactedEntries`).
 

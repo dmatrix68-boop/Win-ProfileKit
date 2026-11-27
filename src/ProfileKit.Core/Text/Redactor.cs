@@ -7,8 +7,12 @@ using ProfileKit.Core.Paths;
 
 namespace ProfileKit.Core.Text;
 
+/// <summary>Eine Datei mit redact-Regel konnte nicht gelesen werden – sie darf dann nicht ins Profil.</summary>
+public sealed class RedactionException(string message) : Exception(message);
+
 /// <summary>
-/// Entfernt Zugangsdaten aus Konfigurationsdateien (JSON-Pfade, INI-Schlüssel). Die Kodierung bleibt erhalten.
+/// Entfernt Zugangsdaten aus Konfigurationsdateien (JSON-Pfade, INI-Schlüssel, XPath). Die Kodierung bleibt erhalten.
+/// Lässt sich eine betroffene Datei nicht lesen, wird <see cref="RedactionException"/> geworfen (fail closed).
 /// </summary>
 public static class Redactor
 {
@@ -21,7 +25,7 @@ public static class Redactor
     {
         if (rules.Count == 0 || bytes.Length == 0) return null;
         var detected = TextEncodingDetector.Detect(bytes);
-        if (detected is null) return null; // Binärdatei – nicht anfassbar
+        if (detected is null) throw new RedactionException("binary file – entries cannot be removed");
         var (encoding, preamble) = detected.Value;
         var text = encoding.GetString(bytes, preamble, bytes.Length - preamble);
 
@@ -45,7 +49,7 @@ public static class Redactor
     {
         JsonNode? root;
         try { root = JsonNode.Parse(text, documentOptions: new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip }); }
-        catch (JsonException) { return text; }
+        catch (JsonException ex) { throw new RedactionException("not valid JSON: " + ex.Message); }
         if (root is null) return text;
 
         var count = 0;
@@ -73,25 +77,45 @@ public static class Redactor
         return root.ToJsonString(new JsonSerializerOptions { WriteIndented = indented, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
     }
 
-    /// <summary>Entfernt alle Elemente/Attribute, die einer der XPath-Ausdrücke trifft. Formatierung bleibt erhalten.</summary>
+    private const string FragmentRoot = "__profilekit_fragment__";
+    private static readonly System.Text.RegularExpressions.Regex XmlDeclaration =
+        new(@"^\s*<\?xml[^>]*\?>\s*", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
+    /// <summary>
+    /// Entfernt alle Elemente/Attribute, die einer der XPath-Ausdrücke trifft. Formatierung bleibt erhalten.
+    /// Auch "XML-artige" Dateien mit mehreren Wurzelelementen werden verarbeitet.
+    /// </summary>
     public static string RedactXml(string text, IEnumerable<string> xpaths, ref int removed)
     {
+        var declaration = XmlDeclaration.Match(text) is { Success: true } m ? m.Value : null;
         System.Xml.Linq.XDocument doc;
-        try { doc = System.Xml.Linq.XDocument.Parse(text, System.Xml.Linq.LoadOptions.PreserveWhitespace); }
-        catch (System.Xml.XmlException) { return text; }
+        bool fragment;
+        try
+        {
+            doc = System.Xml.Linq.XDocument.Parse(text, System.Xml.Linq.LoadOptions.PreserveWhitespace);
+            fragment = false;
+        }
+        catch (System.Xml.XmlException)
+        {
+            // mehrere Wurzelelemente: in ein künstliches Wurzelelement einpacken
+            var body = declaration is null ? text : text[declaration.Length..];
+            try { doc = System.Xml.Linq.XDocument.Parse($"<{FragmentRoot}>{body}</{FragmentRoot}>", System.Xml.Linq.LoadOptions.PreserveWhitespace); }
+            catch (System.Xml.XmlException ex) { throw new RedactionException("not valid XML: " + ex.Message); }
+            fragment = true;
+        }
 
         var count = 0;
         foreach (var xpath in xpaths)
         {
             object result;
             try { result = System.Xml.XPath.Extensions.XPathEvaluate(doc, xpath); }
-            catch (System.Xml.XPath.XPathException) { continue; }
+            catch (System.Xml.XPath.XPathException ex) { throw new RedactionException($"invalid XPath '{xpath}': {ex.Message}"); }
             if (result is not IEnumerable<object> nodes) continue;
             foreach (var node in nodes.ToList())
             {
                 switch (node)
                 {
-                    case System.Xml.Linq.XElement e when e.Parent is not null || e != doc.Root: e.Remove(); count++; break;
+                    case System.Xml.Linq.XElement e when e != doc.Root: e.Remove(); count++; break;
                     case System.Xml.Linq.XAttribute a: a.Remove(); count++; break;
                     case System.Xml.Linq.XText t: t.Value = string.Empty; count++; break;
                 }
@@ -99,8 +123,14 @@ public static class Redactor
         }
         if (count == 0) return text;
         removed += count;
-        var body = doc.ToString(System.Xml.Linq.SaveOptions.DisableFormatting);
-        return doc.Declaration is null ? body : doc.Declaration + (text.Contains("\r\n") ? "\r\n" : "\n") + body;
+
+        if (fragment)
+        {
+            var inner = string.Concat(doc.Root!.Nodes().Select(n => n.ToString(System.Xml.Linq.SaveOptions.DisableFormatting)));
+            return (declaration ?? "") + inner;
+        }
+        var output = doc.ToString(System.Xml.Linq.SaveOptions.DisableFormatting);
+        return doc.Declaration is null ? output : doc.Declaration + (text.Contains("\r\n") ? "\r\n" : "\n") + output;
     }
 
     public static string RedactIni(string text, IEnumerable<string> keys, ref int removed)

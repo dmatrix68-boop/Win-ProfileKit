@@ -9,10 +9,7 @@ sind. Alles hier wird mit Lernmodus bzw. KI-Agent (Phase 2/3) ermittelt und dann
 
 | Programm | winget-ID | Vermutung / offene Frage |
 |---|---|---|
-| Registry Finder | `SergeyFilippov.RegistryFinder` | Registry oder INI? |
-| ExplorerTabUtility | `w4po.ExplorerTabUtility` | JSON in `%APPDATA%` oder neben der EXE? |
-| MediaInfo | `MediaArea.MediaInfo.GUI` | `HKCU\Software\MediaArea`? |
-| AusweisApp | `Governikus.AusweisApp` | Qt-Einstellungen in HKCU – genauer Schlüssel offen |
+| – | | Alle Programme aus dem Standard-Set haben eine Regel. |
 
 ## Bewusst ohne Regel
 

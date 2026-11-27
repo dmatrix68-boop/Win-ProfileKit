@@ -195,6 +195,19 @@ public class AgentToolTests : IClassFixture<AgentFixture>
     }
 
     [Fact]
+    public void Proposal_whose_redact_cannot_be_applied_is_rejected()
+    {
+        var r = _f.Call("propose_rule", new { rule = new
+        {
+            id = "wiztree.broken", displayName = "WizTree", notes = "n",
+            files = new[] { new { path = @"%APPDATA%\WizTree" } },
+            redact = new[] { new { file = "WizTree3.ini", json = new[] { "x" } } },   // INI als JSON → nicht lesbar
+        } });
+        Assert.False(r.GetProperty("stored").GetBoolean());
+        Assert.Contains("redact cannot be applied", r.GetProperty("errors").GetRawText());
+    }
+
+    [Fact]
     public void Proposal_with_only_missing_paths_is_rejected()
     {
         var r = _f.Call("propose_rule", new { rule = new { id = "ghost", displayName = "Ghost", notes = "n", files = new[] { new { path = @"%APPDATA%\Ghost" } } } });

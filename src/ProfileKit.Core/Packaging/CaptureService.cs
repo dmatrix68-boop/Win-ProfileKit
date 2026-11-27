@@ -32,9 +32,9 @@ public sealed class CaptureService
 
             if (File.Exists(sourcePath))
             {
-                if (CopyFile(sourcePath, target, warnings))
+                if (CopyFile(sourcePath, target, warnings) && RedactCopy(rule, Path.GetFileName(sourcePath), target, warnings) is { } n)
                 {
-                    redacted += RedactCopy(rule, Path.GetFileName(sourcePath), target);
+                    redacted += n;
                     fileCount++; totalBytes += new FileInfo(target).Length;
                 }
             }
@@ -45,9 +45,9 @@ public sealed class CaptureService
                     var relative = Path.GetRelativePath(sourcePath, f);
                     if (excludes.IsExcluded(relative)) continue;
                     var dest = PathText.Join(target, relative);
-                    if (CopyFile(f, dest, warnings))
+                    if (CopyFile(f, dest, warnings) && RedactCopy(rule, relative, dest, warnings) is { } n)
                     {
-                        redacted += RedactCopy(rule, relative, dest);
+                        redacted += n;
                         fileCount++; totalBytes += new FileInfo(dest).Length;
                     }
                 }
@@ -79,16 +79,28 @@ public sealed class CaptureService
         return new CaptureResult(entry, warnings);
     }
 
-    /// <summary>Entfernt Zugangsdaten aus der Kopie im Profil (laut <see cref="ModuleRule.Redact"/>); liefert die Anzahl entfernter Einträge.</summary>
-    private static int RedactCopy(ModuleRule rule, string relativePath, string packagedFile)
+    /// <summary>
+    /// Entfernt Zugangsdaten aus der Kopie im Profil (laut <see cref="ModuleRule.Redact"/>); liefert die Anzahl entfernter
+    /// Einträge oder null, wenn die Datei nicht bereinigt werden konnte – dann wird die Kopie gelöscht (fail closed).
+    /// </summary>
+    private static int? RedactCopy(ModuleRule rule, string relativePath, string packagedFile, List<string> warnings)
     {
         if (rule.Redact.Count == 0) return 0;
         var rules = Text.Redactor.RulesFor(rule.Redact, relativePath);
         if (rules.Count == 0) return 0;
-        var result = Text.Redactor.Redact(File.ReadAllBytes(packagedFile), rules);
-        if (result is null) return 0;
-        File.WriteAllBytes(packagedFile, result.Value.Bytes);
-        return result.Value.Removed;
+        try
+        {
+            var result = Text.Redactor.Redact(File.ReadAllBytes(packagedFile), rules);
+            if (result is null) return 0;
+            File.WriteAllBytes(packagedFile, result.Value.Bytes);
+            return result.Value.Removed;
+        }
+        catch (Text.RedactionException ex)
+        {
+            File.Delete(packagedFile);
+            warnings.Add($"Nicht übernommen, weil Zugangsdaten nicht entfernt werden konnten ({ex.Message}): {relativePath}");
+            return null;
+        }
     }
 
     private bool CopyFile(string source, string dest, List<string> warnings)
