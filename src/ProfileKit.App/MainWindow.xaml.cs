@@ -15,7 +15,7 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        AppWindow.Resize(new Windows.Graphics.SizeInt32(1180, 860));
+        AppWindow.Resize(new global::Windows.Graphics.SizeInt32(1180, 860));
         AdminBar.IsOpen = !Elevation.IsAdministrator();
         _runner.Line += (line, isError) => DispatcherQueue.TryEnqueue(() => AppendLog(isError ? "! " + line : line));
         Nav.SelectedItem = Nav.MenuItems[0];
