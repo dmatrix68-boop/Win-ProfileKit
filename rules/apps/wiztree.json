@@ -1,0 +1,11 @@
+{
+  "id": "wiztree",
+  "displayName": "WizTree",
+  "wingetId": "AntibodySoftware.WizTree",
+  "files": [
+    { "path": "%APPDATA%\\WizTree3\\WizTree3.ini" }
+  ],
+  "processes": [ "WizTree64", "WizTree" ],
+  "origin": "Catalog",
+  "notes": "Per 'profilekit ai discover' ermittelt und auf einem echten System geprüft (WizTree 4.34). Alle Benutzereinstellungen stehen in %APPDATA%\\WizTree3\\WizTree3.ini: [frmWizTreeMain] mit Sprache, Spalten, Treemap-Farben, Anzeigeoptionen, Filtern und Fensterpositionen je Auflösung; [history] mit zuletzt gescannten Laufwerken. Keine Registry-Einträge, keine portable INI im Programmordner. Win11ContextMenuState (Exe-Pfad und Hash der Kontextmenü-Registrierung) prüft WizTree beim Start neu. Das MSIX-Kontextmenüpaket (Packages\\AntibodySoftware.WizTreeContextMenu_*) registriert der Installer, es wird nicht übernommen."
+}

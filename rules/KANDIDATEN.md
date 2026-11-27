@@ -9,7 +9,6 @@ sind. Alles hier wird mit Lernmodus bzw. KI-Agent (Phase 2/3) ermittelt und dann
 
 | Programm | winget-ID | Vermutung / offene Frage |
 |---|---|---|
-| WizTree | `AntibodySoftware.WizTree` | `WizTree3.ini` neben der EXE oder in `%APPDATA%\WizTree` |
 | FastStone Image Viewer | `FastStone.Viewer` | `FSSettings.db` unter `%LOCALAPPDATA%\FastStone\FSIV`? |
 | AIDA64 Extreme | `FinalWire.AIDA64.Extreme` | `aida64.ini` im Programmordner; Lizenz dort oder in der Registry? |
 | FinePrint | `FineprintSoftware.FinePrint` | Registry unter `HKCU\Software\FinePrint Software`; Lizenz maschinenweit |
