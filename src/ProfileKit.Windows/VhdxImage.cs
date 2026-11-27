@@ -158,6 +158,7 @@ public sealed class VhdxImage : IDisposable
         var storageType = path.EndsWith(".vhd", StringComparison.OrdinalIgnoreCase) ? "VHD" : "VHDX";
         var script = $$"""
             $ErrorActionPreference = 'Stop'
+            $ProgressPreference = 'SilentlyContinue'
             $p = '{{path.Replace("'", "''")}}'
             $img = Get-DiskImage -ImagePath $p -StorageType {{storageType}} -ErrorAction SilentlyContinue
             $already = [bool]($img -and $img.Attached)
@@ -194,26 +195,26 @@ public sealed class VhdxImage : IDisposable
     private static void Detach(string path)
     {
         var storageType = path.EndsWith(".vhd", StringComparison.OrdinalIgnoreCase) ? "VHD" : "VHDX";
-        var (code, _, error) = RunPowerShell($"Dismount-DiskImage -ImagePath '{path.Replace("'", "''")}' -StorageType {storageType} | Out-Null");
+        var (code, _, error) = RunPowerShell($"$ProgressPreference = 'SilentlyContinue'; Dismount-DiskImage -ImagePath '{path.Replace("'", "''")}' -StorageType {storageType} | Out-Null");
         if (code != 0) Console.Error.WriteLine(T("warning", T("vhdx-detach-failed", path, error.Trim())));
     }
 
     private static (int Code, string Output, string Error) RunPowerShell(string script)
     {
+        // -EncodedCommand statt "-Command -": Über stdin führt powershell.exe einen mehrzeiligen Block am Ende
+        // des Skripts nicht aus, wenn keine Leerzeile folgt – die Volumes wurden so nie ausgegeben.
         var psi = new ProcessStartInfo("powershell.exe")
         {
             UseShellExecute = false,
-            RedirectStandardInput = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             CreateNoWindow = true,
         };
-        foreach (var a in new[] { "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", "-" }) psi.ArgumentList.Add(a);
+        var encoded = Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(script));
+        foreach (var a in new[] { "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-EncodedCommand", encoded }) psi.ArgumentList.Add(a);
         using var process = Process.Start(psi) ?? throw new InvalidOperationException("powershell.exe");
         var stdout = process.StandardOutput.ReadToEndAsync();
         var stderr = process.StandardError.ReadToEndAsync();
-        process.StandardInput.Write(script);
-        process.StandardInput.Close();
         if (!process.WaitForExit(TimeSpan.FromMinutes(2)))
         {
             try { process.Kill(entireProcessTree: true); } catch (InvalidOperationException) { }
