@@ -244,3 +244,6 @@ if (Test-Path (Join-Path $vmProfileOut 'profile.json')) {
 
 if ($failures -gt 0) { Write-Host "`n$failures Fehler" -ForegroundColor Red; exit 1 }
 Write-Host "`nAlle Smoke-Tests bestanden." -ForegroundColor Green
+# Ausdrücklich 0: GitHub Actions beendet pwsh-Schritte sonst mit dem letzten $LASTEXITCODE
+# (der Test "--installed-only und --install" erwartet absichtlich Exitcode 3).
+exit 0

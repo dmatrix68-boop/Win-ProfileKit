@@ -31,3 +31,4 @@ Write-Host "Oberfläche läuft seit $Seconds s (PID $($proc.Id), Fenstertitel '$
 Stop-Process -Id $proc.Id -Force
 if ($title -ne 'Win-ProfileKit') { Write-Host "Warnung: unerwarteter Fenstertitel '$title' (ohne interaktive Sitzung möglich)." -ForegroundColor Yellow }
 Write-Host 'Starttest bestanden.' -ForegroundColor Green
+exit 0
