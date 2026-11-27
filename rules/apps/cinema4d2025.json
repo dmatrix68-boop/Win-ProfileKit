@@ -1,0 +1,13 @@
+{
+  "id": "cinema4d2025",
+  "displayName": "Maxon Cinema 4D 2025",
+  "wingetId": "Maxon.Cinema4D.2025",
+  "files": [ { "path": "%APPDATA%\\Maxon\\Maxon Cinema 4D 2025_789E552B" } ],
+  "excludes": [
+    "EBWebView\\**", "description.db", "description.db\\**", "dc\\**", "_bugreports\\**",
+    "python311\\maxon_generated\\**", "userrepository\\databaseid", "*.log", "*.dmp", "*.bak"
+  ],
+  "processes": [ "Cinema 4D", "Commandline", "Cinema 4D Team Render Client", "Cinema 4D Team Render Server" ],
+  "origin": "Catalog",
+  "notes": "Per 'profilekit ai discover' ermittelt und auf einem echten System geprüft (2025.3.3). Alle Benutzereinstellungen in %APPDATA%\\Maxon\\Maxon Cinema 4D 2025_789E552B: prefs (c4d_*.prf, wird erst beim regulären Beenden geschrieben – Cinema 4D vor dem Erfassen einmal normal schließen), library (Layouts, Skripte, Schemata, Presets), plugins, gluon\\stylesheet.json, language.prf, licensetype.prf (gewählte Lizenzart, kein Schlüssel), python311\\libs (eigene Python-Pakete). Die Endung 789E552B ist ein Hash des Installationspfads: die Regel passt nur bei Installation unter %PROGRAMFILES%\\Maxon Cinema 4D 2025 (Standard bei winget). Ausgeschlossen: EBWebView (Browserdaten mit Cookies), description.db und dc (Caches), python311\\maxon_generated, userrepository\\databaseid (Maschinen-ID), _bugreports. Registry HKCU\\Software\\Maxon und MaxonApps (verschleierte Lizenz-/Maschinenwerte) bleibt außen vor; die Lizenz läuft über das Maxon-Konto und muss neu angemeldet werden."
+}

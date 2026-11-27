@@ -11,12 +11,12 @@ public class BatchDiscoveryTests
           "apps": { "items": [
             { "uid": "1", "enabled": true,  "id": "7zip.7zip", "name": "7-Zip", "version": "26.02", "source": "winget", "manager": "winget", "args": "" },
             { "uid": "2", "enabled": true,  "id": "AntibodySoftware.WizTree", "name": "WizTree", "source": "winget", "manager": "winget" },
-            { "uid": "3", "enabled": true,  "id": "FineprintSoftware.FinePrint", "name": "FinePrint", "source": "winget", "manager": "winget" },
+            { "uid": "3", "enabled": true,  "id": "Contoso.PhotoTool", "name": "Contoso PhotoTool", "source": "winget", "manager": "winget" },
             { "uid": "4", "enabled": true,  "id": "Microsoft.DotNet.DesktopRuntime.10", "name": ".NET Desktop Runtime 10", "source": "winget", "manager": "winget" },
             { "uid": "5", "enabled": false, "id": "Disabled.App", "name": "Deaktiviert", "source": "winget", "manager": "winget" },
             { "uid": "6", "enabled": true,  "id": "9ND14WHFRGSX", "name": "Modern Winver", "source": "msstore", "manager": "winget" },
             { "uid": "7", "enabled": true,  "id": "rustdesk.install", "name": "Rustdesk", "source": "community", "manager": "chocolatey" },
-            { "uid": "8", "enabled": true,  "id": "PowerSoftware.AnyBurn", "name": "AnyBurn", "source": "winget", "manager": "winget" },
+            { "uid": "8", "enabled": true,  "id": "Contoso.Burner", "name": "Contoso Burner", "source": "winget", "manager": "winget" },
             { "uid": "9", "enabled": true,  "id": "Other.SevenZip", "name": "7zip", "source": "winget", "manager": "winget" }
           ] },
           "answer": { "account": { "accounts": [ { "name": "x", "password": "nicht-lesen" } ] } }
@@ -36,28 +36,28 @@ public class BatchDiscoveryTests
         Assert.Null(packages.Single(p => p.Name == "Modern Winver").WingetId);   // msstore
         Assert.Null(packages.Single(p => p.Name == "Rustdesk").WingetId);        // chocolatey
         Assert.Equal("chocolatey/community", packages.Single(p => p.Name == "Rustdesk").Manager);
-        Assert.Equal("FineprintSoftware.FinePrint", packages.Single(p => p.Name == "FinePrint").WingetId);
+        Assert.Equal("Contoso.PhotoTool", packages.Single(p => p.Name == "Contoso PhotoTool").WingetId);
     }
 
     [Fact]
     public void Plans_only_programs_without_rule_proposal_or_skip_entry()
     {
-        var plan = BatchPlanner.Plan(PackageSources.FromOemProject(OemProject), Catalog, ["anyburn"], Skip)
+        var plan = BatchPlanner.Plan(PackageSources.FromOemProject(OemProject), Catalog, ["contosoburner"], Skip)
             .ToDictionary(i => i.Package.Name);
 
         Assert.Equal(BatchDecision.HasRule, plan["7-Zip"].Decision);
         Assert.Equal(BatchDecision.HasRule, plan["WizTree"].Decision);
         Assert.Equal("wiztree", plan["WizTree"].ModuleId);
-        Assert.Equal(BatchDecision.Discover, plan["FinePrint"].Decision);
-        Assert.Equal("fineprint", plan["FinePrint"].ModuleId);
+        Assert.Equal(BatchDecision.Discover, plan["Contoso PhotoTool"].Decision);
+        Assert.Equal("contosophototool", plan["Contoso PhotoTool"].ModuleId);
         Assert.Equal(BatchDecision.NoSettings, plan[".NET Desktop Runtime 10"].Decision);
-        Assert.Equal(BatchDecision.HasProposal, plan["AnyBurn"].Decision);
+        Assert.Equal(BatchDecision.HasProposal, plan["Contoso Burner"].Decision);
         Assert.Equal(BatchDecision.HasRule, plan["Rustdesk"].Decision);          // ID "rustdesk" ohne winget-ID → Katalogregel zuständig
         Assert.Equal(BatchDecision.NoSettings, plan["Modern Winver"].Decision);  // Store-Paket, per Name übersprungen
         Assert.Equal(BatchDecision.IdConflict, plan["7zip"].Decision);           // gleiche ID, andere winget-ID
 
-        var retry = BatchPlanner.Plan(PackageSources.FromOemProject(OemProject), Catalog, ["anyburn"], Skip, retryProposals: true);
-        Assert.Equal(BatchDecision.Discover, retry.Single(i => i.Package.Name == "AnyBurn").Decision);
+        var retry = BatchPlanner.Plan(PackageSources.FromOemProject(OemProject), Catalog, ["contosoburner"], Skip, retryProposals: true);
+        Assert.Equal(BatchDecision.Discover, retry.Single(i => i.Package.Name == "Contoso Burner").Decision);
     }
 
     [Fact]

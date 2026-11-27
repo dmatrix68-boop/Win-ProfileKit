@@ -1,0 +1,21 @@
+{
+  "id": "hasleobackupsuite",
+  "displayName": "Hasleo Backup Suite",
+  "wingetId": "Hasleo.BackupSuiteFree",
+  "files": [ { "path": "%PROGRAMFILES%\\Hasleo\\Hasleo Backup Suite\\bin\\Backup Suite.ini" } ],
+  "registry": [
+    { "key": "HKCU\\Software\\Hasleo Software\\Backup Suite" },
+    {
+      "key": "HKLM\\SOFTWARE\\Hasleo\\Backup Suite",
+      "values": [
+        "AutoCheckUpdate", "BackupNotPreventShutDownReboot", "DefaultImageStorageEncryptionFlag", "DefaultImageStoragePath",
+        "DefaultImageStorageFixedPath", "DoNotCreateSeparateTaskFolder", "EnableDesktopIcon", "PowerOperationDelayTime",
+        "TaskDefaultCompressionLevel", "TaskSchedulingDelayTime"
+      ],
+      "recurse": false
+    }
+  ],
+  "processes": [ "BackupMainUI", "BackupSystemTray" ],
+  "origin": "Catalog",
+  "notes": "Per 'profilekit ai discover' ermittelt und auf einem echten System geprüft (Version 6.0.2.0, Free). Je Benutzer nur die Fensterposition (HKCU\\Software\\Hasleo Software\\Backup Suite). Die Programmoptionen gelten maschinenweit in HKLM\\SOFTWARE\\Hasleo\\Backup Suite (Standard-Sicherungsort, Komprimierung, Verzögerungen, Update-Prüfung, Desktop-Symbol) – nur einzeln genannte Werte; Schreiben braucht Adminrechte und wirkt für alle Benutzer. bin\\Backup Suite.ini (UTF-16) enthält die Oberflächensprache. Nicht übernommen: Benutzername/Kennwort der Netzwerkfreigabe (DefaultImageStorageUsername/-Password), IPC-Ports, LastStartupTriggerTime, %PROGRAMDATA%\\Hasleo Backup Suite\\TaskConfig.xml (Sicherungsaufgaben, an die Datenträger des Rechners gebunden, ggf. mit Kennwörtern – auf dem Ziel neu einrichten), NetConnect.db, OperationLog.db und weitere Zustandsdateien. Keine Lizenzdatei in der Free-Version."
+}
