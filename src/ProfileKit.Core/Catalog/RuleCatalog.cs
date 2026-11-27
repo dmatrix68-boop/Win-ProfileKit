@@ -50,5 +50,11 @@ public sealed class RuleCatalog
         foreach (var f in rule.Files) PathTokens.Parse(f.Path);
         foreach (var r in rule.Registry) RegistryPath.Split(r.Key);
         foreach (var e in rule.Excludes) _ = new Glob(e);
+        foreach (var r in rule.Redact)
+        {
+            if (string.IsNullOrWhiteSpace(r.File)) throw new FormatException($"{rule.Id}: redact.file fehlt.");
+            _ = new Glob(r.File);
+            if (r.Json.Count + r.Ini.Count == 0) throw new FormatException($"{rule.Id}: redact für '{r.File}' nennt keine Schlüssel.");
+        }
     }
 }

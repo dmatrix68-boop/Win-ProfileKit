@@ -14,7 +14,7 @@ Testbenutzer auf Installations-VMs und für den OEM-Skriptlauf
 ## Funktionen (Phase 1)
 
 * **Regelkatalog** (`rules/`): je Programm, welche Dateien und Registry-Schlüssel dazugehören –
-  aktuell 17 Programme (u. a. PowerToys, Windows Terminal, Total Commander und WinRAR inkl.
+  aktuell 20 Programme (u. a. PowerToys, Windows Terminal, Total Commander und WinRAR inkl.
   Keyfile, Everything, XnView MP, VLC, HandBrake, Ditto, RustDesk, UniGetUI) und Windows-Module
   für Maus, Design, Zwischenablageverlauf, Explorer und Taskleiste. Noch offene Programme:
   [rules/KANDIDATEN.md](rules/KANDIDATEN.md).

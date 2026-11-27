@@ -162,12 +162,12 @@ Assert-True ($config -match 'win-profilekit') 'mcp config gibt Client-Konfigurat
 # --- Stapelmodus (Planung ohne KI) ----------------------------------------------------
 $wingetFile = Join-Path $Work 'winget-export.json'
 @{ '$schema' = 'https://aka.ms/winget-packages.schema.2.0.json'; Sources = @(@{ Packages = @(
-    @{ PackageIdentifier = '7zip.7zip' }, @{ PackageIdentifier = 'FastStone.Viewer' }, @{ PackageIdentifier = 'Microsoft.DotNet.DesktopRuntime.10' }) }) } |
+    @{ PackageIdentifier = '7zip.7zip' }, @{ PackageIdentifier = 'FineprintSoftware.FinePrint' }, @{ PackageIdentifier = 'Microsoft.DotNet.DesktopRuntime.10' }) }) } |
     ConvertTo-Json -Depth 6 | Set-Content $wingetFile -Encoding UTF8
 $planOut = & $Exe ai discover --from-winget $wingetFile --dry-run --rules $rules --lang de | Out-String
 Write-Host $planOut
 Assert-True ($LASTEXITCODE -eq 0) 'Stapelmodus: Trockenlauf'
-Assert-True ($planOut -match 'KI-Suche\s+faststone') 'Stapelmodus: FastStone wird untersucht'
+Assert-True ($planOut -match 'KI-Suche\s+fineprint') 'Stapelmodus: FinePrint wird untersucht'
 Assert-True ($planOut -match 'Regel vorhanden\s+7zip') 'Stapelmodus: 7-Zip hat eine Regel'
 Assert-True ($planOut -match 'ohne Einstellungen') 'Stapelmodus: Runtime übersprungen'
 

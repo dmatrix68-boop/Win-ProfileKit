@@ -22,7 +22,9 @@ public static class Prompts
         - Prefer per-user locations (%APPDATA%, %LOCALAPPDATA%, %LOCALAPPDATALOW%, HKCU). Machine locations only if the program keeps its settings there (e.g. an INI in Program Files).
         - Take the program's settings folder as a whole and exclude caches, logs, thumbnails, indexes, crash dumps, update downloads and databases with private history (excludes, e.g. "*.log", "cache\\**").
         - Registry: the vendor/program key as a whole; for shared Windows keys only explicit value names.
-        - Never include credentials, passwords, tokens, cookies, browser data or files with machine IDs. License key files that live next to the settings may be included with "kind": "Keyfile".
+        - Never include credentials, passwords, tokens, cookies, browser data or files with machine IDs. If a settings file you need also contains
+          such fields (e.g. SMTPPassword in an INI, DPAPI "...Protected" values in JSON), keep the file and list those keys in "redact".
+        - License key files next to the settings or the program (e.g. rarreg.key, pkey.txt, *.lic) MUST be included with "kind": "Keyfile" – the user re-enters other licenses, but copies key files.
         - Include the winget id if known, process names to close, and in "notes" what is stored where and how you verified it.
         - Module id: lowercase, e.g. "wiztree".
 

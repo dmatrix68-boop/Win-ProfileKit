@@ -104,6 +104,7 @@ public class AccessGuardTests : IClassFixture<AgentFixture>
     [InlineData(@"%USERPROFILE%\.ssh\id_ed25519", false)]
     [InlineData(@"%LOCALAPPDATA%\Google\Chrome\User Data\Default\Login Data", false)]
     [InlineData(@"%APPDATA%\GHISLER\wcx_ftp.ini", false)]
+    [InlineData(@"%PROGRAMFILES%\FinalWire\AIDA64 Extreme\pkey.txt", false)]
     [InlineData(@"%APPDATA%\WizTree\WizTree3.ini", true)]
     public void Sensitive_content_is_withheld(string path, bool allowed) =>
         Assert.Equal(allowed, AccessGuard.IsContentAllowed(path));

@@ -48,6 +48,22 @@ public sealed record RegistryRule
     public bool Recurse { get; init; } = true;
 }
 
+/// <summary>Zu entfernende Einträge in einer Konfigurationsdatei.</summary>
+public sealed record RedactRule
+{
+    /// <summary>Datei als Glob relativ zum Dateieintrag, z. B. <c>settings.json</c> oder <c>**\*.ini</c>.</summary>
+    public required string File { get; init; }
+
+    /// <summary>
+    /// JSON-Pfade mit Punkt getrennt, z. B. <c>Configuration.User.TokenProtected</c>;
+    /// <c>**.Name</c> entfernt die Eigenschaft in jeder Tiefe (Name als Glob, z. B. <c>**.*Protected</c>).
+    /// </summary>
+    public List<string> Json { get; init; } = [];
+
+    /// <summary>INI-Schlüssel, wahlweise mit Abschnitt: <c>SMTPPassword</c> (alle Abschnitte) oder <c>Generic.SMTPPassword</c>.</summary>
+    public List<string> Ini { get; init; } = [];
+}
+
 /// <summary>Regel: was gehört zu einem Programm bzw. Windows-Bereich?</summary>
 public sealed record ModuleRule
 {
@@ -65,6 +81,12 @@ public sealed record ModuleRule
 
     /// <summary>Ausschlüsse als Glob relativ zum jeweiligen Dateieintrag, z. B. <c>**\*.log</c>, <c>backup\**</c>.</summary>
     public List<string> Excludes { get; init; } = [];
+
+    /// <summary>
+    /// Einträge, die beim Erfassen aus Konfigurationsdateien entfernt werden (Zugangsdaten, Tokens).
+    /// Die Datei selbst wird übernommen, die genannten Schlüssel landen nie im Profil.
+    /// </summary>
+    public List<RedactRule> Redact { get; init; } = [];
 
     /// <summary>Hinweise zur Live-Aktivierung nach dem Anwenden, z. B. <c>mouse</c>, <c>theme</c>, <c>explorer</c>.</summary>
     public List<string> PostApply { get; init; } = [];

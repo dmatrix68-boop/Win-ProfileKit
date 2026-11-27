@@ -383,6 +383,22 @@ public static class AgentTools
                 ["registry"] = new JsonObject { ["type"] = "array", ["items"] = reg },
                 ["excludes"] = new JsonObject { ["type"] = "array", ["items"] = new JsonObject { ["type"] = "string" }, ["description"] = "Glob patterns relative to each folder for caches, logs, databases, credentials (e.g. *.log, cache\\**)." },
                 ["processes"] = new JsonObject { ["type"] = "array", ["items"] = new JsonObject { ["type"] = "string" }, ["description"] = "Process names without .exe that should be closed before applying." },
+                ["redact"] = new JsonObject
+                {
+                    ["type"] = "array",
+                    ["description"] = "Entries removed from captured files: use when a settings file also contains credentials, tokens or DPAPI blobs. The file is kept, the listed keys never leave the computer.",
+                    ["items"] = new JsonObject
+                    {
+                        ["type"] = "object",
+                        ["properties"] = new JsonObject
+                        {
+                            ["file"] = str("File glob relative to the files entry, e.g. settings.json."),
+                            ["json"] = new JsonObject { ["type"] = "array", ["items"] = new JsonObject { ["type"] = "string" }, ["description"] = "Dot paths, e.g. Configuration.User.Token; '**.Name' removes the property at any depth (glob allowed, e.g. **.*Protected)." },
+                            ["ini"] = new JsonObject { ["type"] = "array", ["items"] = new JsonObject { ["type"] = "string" }, ["description"] = "INI keys, optionally Section.Key, e.g. SMTPPassword." },
+                        },
+                        ["required"] = new JsonArray("file"),
+                    },
+                },
                 ["notes"] = str("Short explanation: what is stored where and how you found out (file names, sources)."),
             },
             ["required"] = new JsonArray("id", "displayName", "notes"),

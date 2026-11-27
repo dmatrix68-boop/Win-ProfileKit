@@ -24,6 +24,9 @@ public sealed record ModuleEntry
     public long TotalBytes { get; init; }
     public int RegistryValueCount { get; init; }
     public bool ContainsKeyfiles { get; init; }
+
+    /// <summary>Beim Erfassen entfernte Einträge (Zugangsdaten), siehe <see cref="ModuleRule.Redact"/>.</summary>
+    public int RedactedEntries { get; init; }
 }
 
 /// <summary>Inhalt von <c>profile.json</c>.</summary>

@@ -22,7 +22,7 @@ public sealed class CaptureService
         Directory.CreateDirectory(moduleDir);
 
         var excludes = new ExcludeSet(rule.Excludes);
-        int fileCount = 0;
+        int fileCount = 0, redacted = 0;
         long totalBytes = 0;
 
         foreach (var file in rule.Files)
@@ -32,7 +32,11 @@ public sealed class CaptureService
 
             if (File.Exists(sourcePath))
             {
-                if (CopyFile(sourcePath, target, warnings)) { fileCount++; totalBytes += new FileInfo(target).Length; }
+                if (CopyFile(sourcePath, target, warnings))
+                {
+                    redacted += RedactCopy(rule, Path.GetFileName(sourcePath), target);
+                    fileCount++; totalBytes += new FileInfo(target).Length;
+                }
             }
             else if (Directory.Exists(sourcePath))
             {
@@ -41,7 +45,11 @@ public sealed class CaptureService
                     var relative = Path.GetRelativePath(sourcePath, f);
                     if (excludes.IsExcluded(relative)) continue;
                     var dest = PathText.Join(target, relative);
-                    if (CopyFile(f, dest, warnings)) { fileCount++; totalBytes += new FileInfo(dest).Length; }
+                    if (CopyFile(f, dest, warnings))
+                    {
+                        redacted += RedactCopy(rule, relative, dest);
+                        fileCount++; totalBytes += new FileInfo(dest).Length;
+                    }
                 }
             }
             else if (!file.Optional)
@@ -66,8 +74,21 @@ public sealed class CaptureService
             TotalBytes = totalBytes,
             RegistryValueCount = values.Count,
             ContainsKeyfiles = rule.ContainsKeyfiles,
+            RedactedEntries = redacted,
         };
         return new CaptureResult(entry, warnings);
+    }
+
+    /// <summary>Entfernt Zugangsdaten aus der Kopie im Profil (laut <see cref="ModuleRule.Redact"/>); liefert die Anzahl entfernter Einträge.</summary>
+    private static int RedactCopy(ModuleRule rule, string relativePath, string packagedFile)
+    {
+        if (rule.Redact.Count == 0) return 0;
+        var rules = Text.Redactor.RulesFor(rule.Redact, relativePath);
+        if (rules.Count == 0) return 0;
+        var result = Text.Redactor.Redact(File.ReadAllBytes(packagedFile), rules);
+        if (result is null) return 0;
+        File.WriteAllBytes(packagedFile, result.Value.Bytes);
+        return result.Value.Removed;
     }
 
     private bool CopyFile(string source, string dest, List<string> warnings)

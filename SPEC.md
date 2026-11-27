@@ -69,7 +69,26 @@ in allen üblichen Schreibweisen:
 * Kodierung bleibt erhalten (UTF-8 mit/ohne BOM, UTF-16 LE/BE, sonst byte-treu)
 * Binärdateien (NUL-Bytes) werden nicht verändert
 
-### 3.3 Paketformat
+### 3.3 Zugangsdaten in Konfigurationsdateien
+
+Manche Programme legen Zugangsdaten in derselben Datei ab wie ihre Einstellungen (z. B.
+`SMTPPassword` in `aida64.ini`, DPAPI-verschlüsselte Tokens in DeepLs `settings.json`). Solche
+Dateien werden übernommen, die betroffenen Einträge aber **beim Erfassen** entfernt – sie landen
+nie im Profil. Die Regel nennt sie im Feld `redact`:
+
+```json
+"redact": [
+  { "file": "aida64.ini",    "ini":  [ "SMTPUser", "SMTPPassword" ] },
+  { "file": "settings.json", "json": [ "Configuration.User.UserData", "**.*Protected" ] }
+]
+```
+
+`file` ist ein Glob relativ zum Dateieintrag; `ini` nennt Schlüssel (optional `Abschnitt.Schlüssel`),
+`json` Pfade mit Punkt (`**.Name` = in jeder Tiefe, Name als Glob). Kodierung und BOM bleiben
+erhalten; Binärdateien werden nicht verändert. Die Zahl entfernter Einträge steht je Modul im
+Manifest (`redactedEntries`).
+
+### 3.4 Paketformat
 
 Ein Profil ist ein **Ordner** (gut auf Freigaben, diff-bar) und optional eine
 **ZIP-Datei** `<Name>.pkprofile` mit identischem Inhalt.

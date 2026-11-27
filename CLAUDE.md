@@ -44,8 +44,12 @@ CI auf `windows-latest` (`.github/workflows/build.yml`).
 - Registry-Zugriffe nur über `IRegistryBackend`; neue Logik mit In-Memory-Backend testen.
 - KI-Ergebnisse sind Vorschläge: nie ungeprüft ausführen, nie schreibende Werkzeuge
   für den Agenten.
-- Keine Passwörter, Tokens oder DPAPI-Daten in Regeln aufnehmen. Keyfiles nur mit
-  `"kind": "keyfile"`.
+- Keine Passwörter, Tokens oder DPAPI-Daten in Regeln aufnehmen. Stehen sie in einer
+  benötigten Konfigurationsdatei, die Einträge über `redact` entfernen (SPEC 3.3).
+- Lizenz-Keyfiles neben Einstellungen oder Programm (z. B. `rarreg.key`, `pkey.txt`) gehören
+  in die Regel, immer mit `"kind": "Keyfile"`.
+- KI-Vorschläge vor der Übernahme in den Katalog prüfen: Keyfiles vorhanden? Zugangsdaten
+  per `redact` entfernt? Notizen auf Deutsch, Herkunft `Catalog`.
 - Alle Texte für Benutzer zweisprachig (DE/EN) über `Localizer`.
 - Neue Katalogregel: winget-ID angeben, Caches/Logs in `excludes`, Quelle der
   Information im Feld `notes`.

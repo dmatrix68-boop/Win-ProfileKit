@@ -26,7 +26,8 @@ public sealed class AccessGuard(UserContext user)
         @"%APPDATA%\Microsoft\Crypto\**", @"%APPDATA%\Microsoft\SystemCertificates\**", @"%LOCALAPPDATA%\Microsoft\Vault\**",
         @"%USERPROFILE%\.ssh\**", @"%USERPROFILE%\.gnupg\**", @"%USERPROFILE%\.aws\**", @"%USERPROFILE%\.azure\**",
         @".git-credentials", @".netrc", @"_netrc", @"NTUSER.DAT*", @"UsrClass.dat*",
-        @"*.pfx", @"*.p12", @"*.pem", @"*.ppk", @"*.kdbx", @"*.key", @"*.lic", @"*.license", @"license*.*", @"rarreg.*",
+        @"*.pfx", @"*.p12", @"*.pem", @"*.ppk", @"*.kdbx", @"*.key", @"*.lic", @"*.license", @"license*.*", @"*license*", @"rarreg.*",
+        @"pkey.*", @"*serial*", @"regkey*", @"*.reg.key",
         @"Login Data*", @"Cookies*", @"Web Data*", @"logins.json", @"key4.db", @"cert9.db", @"Local State",
         @"wcx_ftp.ini", @"RustDesk.toml", @"*.token", @"credentials*", @"secrets*", @"*.env", @".env*",
     ]);

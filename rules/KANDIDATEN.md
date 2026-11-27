@@ -9,10 +9,7 @@ sind. Alles hier wird mit Lernmodus bzw. KI-Agent (Phase 2/3) ermittelt und dann
 
 | Programm | winget-ID | Vermutung / offene Frage |
 |---|---|---|
-| FastStone Image Viewer | `FastStone.Viewer` | `FSSettings.db` unter `%LOCALAPPDATA%\FastStone\FSIV`? |
-| AIDA64 Extreme | `FinalWire.AIDA64.Extreme` | `aida64.ini` im Programmordner; Lizenz dort oder in der Registry? |
 | FinePrint | `FineprintSoftware.FinePrint` | Registry unter `HKCU\Software\FinePrint Software`; Lizenz maschinenweit |
-| DeepL | `DeepL.DeepL` | Einstellungen teils im Konto; lokaler Anteil in `%APPDATA%`/`%LOCALAPPDATA%` unklar |
 | Link Shell Extension | `HermannSchinagl.LinkShellExtension` | Optionen in HKCU oder HKLM? |
 | Registry Finder | `SergeyFilippov.RegistryFinder` | Registry oder INI? |
 | AnyBurn | `PowerSoftware.AnyBurn` | Registry oder INI? |
