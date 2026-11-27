@@ -110,6 +110,18 @@ public static class Localizer
         ["mcp-uninstalled"] = "MCP-Server aus Claude Desktop entfernt: {0}",
         ["mcp-config-hint"] = "Konfiguration für MCP-Clients (Claude Desktop, Cursor, VS Code, Codex u. a. – Eintrag unter \"mcpServers\"):",
         ["models-header"] = "{0} Modelle mit Tool-Unterstützung:",
+        ["sel-unknown"] = "Unbekannte KI-Stufe '{0}'. Erlaubt: {1}.",
+        ["sel-reason-claude"] = "Claude Code ist installiert",
+        ["sel-reason-ollama"] = "Ollama läuft",
+        ["sel-reason-openrouter"] = "OpenRouter-Key und Modell sind eingerichtet",
+        ["sel-reason-selected"] = "ausgewählt",
+        ["sel-none"] = "Keine KI verfügbar: Claude Code installieren, Ollama mit einem Modell starten oder OpenRouter einrichten (profilekit ai key set, profilekit ai config --openrouter-model <id>).",
+        ["sel-no-claude"] = "Claude Code ('claude') wurde im PATH nicht gefunden.",
+        ["sel-ollama-off"] = "Ollama ist unter {0} nicht erreichbar.",
+        ["sel-ollama-empty"] = "In Ollama ist kein Modell installiert (ollama pull <Modell>).",
+        ["sel-ollama-missing"] = "Das Ollama-Modell '{0}' ist nicht installiert. Installiert: {1}.",
+        ["sel-no-key"] = "Kein OpenRouter-API-Key gespeichert (profilekit ai key set).",
+        ["sel-no-model"] = "Kein OpenRouter-Modell eingestellt – eines aus 'profilekit ai models --provider openrouter' wählen (profilekit ai config --openrouter-model <id>).",
     };
 
     private static readonly Dictionary<string, string> En = new()
@@ -194,5 +206,17 @@ public static class Localizer
         ["mcp-uninstalled"] = "MCP server removed from Claude Desktop: {0}",
         ["mcp-config-hint"] = "Configuration for MCP clients (Claude Desktop, Cursor, VS Code, Codex and others – entry under \"mcpServers\"):",
         ["models-header"] = "{0} models with tool support:",
+        ["sel-unknown"] = "Unknown AI tier '{0}'. Allowed: {1}.",
+        ["sel-reason-claude"] = "Claude Code is installed",
+        ["sel-reason-ollama"] = "Ollama is running",
+        ["sel-reason-openrouter"] = "OpenRouter key and model are configured",
+        ["sel-reason-selected"] = "selected",
+        ["sel-none"] = "No AI available: install Claude Code, start Ollama with a model, or configure OpenRouter (profilekit ai key set, profilekit ai config --openrouter-model <id>).",
+        ["sel-no-claude"] = "Claude Code ('claude') was not found in PATH.",
+        ["sel-ollama-off"] = "Ollama is not reachable at {0}.",
+        ["sel-ollama-empty"] = "Ollama has no models installed (ollama pull <model>).",
+        ["sel-ollama-missing"] = "Ollama model '{0}' is not installed. Installed: {1}.",
+        ["sel-no-key"] = "No OpenRouter API key stored (profilekit ai key set).",
+        ["sel-no-model"] = "No OpenRouter model configured – choose one from 'profilekit ai models --provider openrouter' (profilekit ai config --openrouter-model <id>).",
     };
 }

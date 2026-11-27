@@ -1,4 +1,5 @@
 using ProfileKit.Core.Packaging;
+using static ProfileKit.Core.Text.Localizer;
 
 namespace ProfileKit.Core.Agent;
 
@@ -51,45 +52,44 @@ public static class ProviderSelector
     {
         var provider = providerOverride ?? settings.Provider;
         if (!AiProviders.All.Contains(provider))
-            throw new InvalidOperationException($"Unknown provider '{provider}'. Allowed: {string.Join(", ", AiProviders.All)}.");
+            throw new InvalidOperationException(T("sel-unknown", provider, string.Join(", ", AiProviders.All)));
 
         if (provider == AiProviders.Auto)
         {
-            if (available.ClaudeCodePath is not null) return new(AiProviders.ClaudeCode, modelOverride, "Claude Code is installed");
-            if (available.OllamaModels is { Count: > 0 }) return OllamaChoice(settings, available, modelOverride, "Ollama is running");
+            if (available.ClaudeCodePath is not null) return new(AiProviders.ClaudeCode, modelOverride, T("sel-reason-claude"));
+            if (available.OllamaModels is { Count: > 0 }) return OllamaChoice(settings, available, modelOverride, T("sel-reason-ollama"));
             if (available.OpenRouterKey && (modelOverride ?? settings.OpenRouterModel) is not null)
-                return OpenRouterChoice(settings, available, modelOverride, "OpenRouter key and model are configured");
-            throw new InvalidOperationException(
-                "No AI available: install Claude Code, start Ollama with a model, or configure OpenRouter (profilekit ai key set, profilekit ai config --openrouter-model <id>).");
+                return OpenRouterChoice(settings, available, modelOverride, T("sel-reason-openrouter"));
+            throw new InvalidOperationException(T("sel-none"));
         }
 
         return provider switch
         {
             AiProviders.ClaudeCode => available.ClaudeCodePath is not null
-                ? new(provider, modelOverride, "selected")
-                : throw new InvalidOperationException("Claude Code ('claude') was not found in PATH."),
-            AiProviders.Ollama => OllamaChoice(settings, available, modelOverride, "selected"),
-            _ => OpenRouterChoice(settings, available, modelOverride, "selected"),
+                ? new(provider, modelOverride, T("sel-reason-selected"))
+                : throw new InvalidOperationException(T("sel-no-claude")),
+            AiProviders.Ollama => OllamaChoice(settings, available, modelOverride, T("sel-reason-selected")),
+            _ => OpenRouterChoice(settings, available, modelOverride, T("sel-reason-selected")),
         };
     }
 
     private static ProviderChoice OllamaChoice(AiSettings s, AiAvailability a, string? model, string reason)
     {
-        if (a.OllamaModels is null) throw new InvalidOperationException($"Ollama is not reachable at {s.OllamaUrl ?? OpenAiCompatibleChatClient.OllamaDefaultUrl}.");
+        if (a.OllamaModels is null) throw new InvalidOperationException(T("sel-ollama-off", s.OllamaUrl ?? OpenAiCompatibleChatClient.OllamaDefaultUrl));
         var chosen = model ?? s.OllamaModel ?? a.OllamaModels.FirstOrDefault()
-            ?? throw new InvalidOperationException("Ollama has no models installed (ollama pull <model>).");
+            ?? throw new InvalidOperationException(T("sel-ollama-empty"));
         // "qwen3" passt auf das installierte "qwen3:8b" – Ollama braucht den vollständigen Namen
         var installed = a.OllamaModels.FirstOrDefault(m => m.Equals(chosen, StringComparison.OrdinalIgnoreCase))
             ?? a.OllamaModels.FirstOrDefault(m => m.StartsWith(chosen + ":", StringComparison.OrdinalIgnoreCase))
-            ?? throw new InvalidOperationException($"Ollama model '{chosen}' is not installed. Installed: {string.Join(", ", a.OllamaModels)}.");
+            ?? throw new InvalidOperationException(T("sel-ollama-missing", chosen, string.Join(", ", a.OllamaModels)));
         return new(AiProviders.Ollama, installed, reason);
     }
 
     private static ProviderChoice OpenRouterChoice(AiSettings s, AiAvailability a, string? model, string reason)
     {
-        if (!a.OpenRouterKey) throw new InvalidOperationException("No OpenRouter API key stored (profilekit ai key set).");
+        if (!a.OpenRouterKey) throw new InvalidOperationException(T("sel-no-key"));
         var chosen = model ?? s.OpenRouterModel
-            ?? throw new InvalidOperationException("No OpenRouter model configured – choose one from 'profilekit ai models --provider openrouter' (profilekit ai config --openrouter-model <id>).");
+            ?? throw new InvalidOperationException(T("sel-no-model"));
         return new(AiProviders.OpenRouter, chosen, reason);
     }
 }
