@@ -16,12 +16,18 @@ internal static class HelpText
           capture --out <Ordner> --name <Name> (--modules a,b | --installed) [--user <Name>] [--zip]
                                           Profil erfassen; Module als Liste oder Muster (windows.*),
                                           --installed = alle installierten Programme mit Regel
+          collect --out <Ordner|\\Server\Freigabe> [--user <Name>] [--name <Name>] [--only <Muster>] [--no-windows] [--zip]
+                                          Sammler für den Quellrechner (auch direkt von einer Freigabe):
+                                          alle installierten Programme mit Regel + Windows + Inventar
+          compare --profile <Ordner|.pkprofile>
+                                          Abgleich mit diesem Rechner: installiert / installierbar / fehlt
           info --profile <Ordner|.pkprofile>
                                           Inhalt eines Profils anzeigen
           apply --profile <Ordner|.pkprofile>
                 (--current-user | --user <Name> | --default-user | --create-user <Name>)
-                [--install] [--only <Muster>] [--dry-run] [--no-backup] [--no-machine]
-                                          Profil anwenden; --install installiert fehlende Programme
+                [--install | --installed-only] [--only <Muster>] [--dry-run] [--no-backup] [--no-machine]
+                                          Profil anwenden; --install installiert fehlende Programme,
+                                          --installed-only nur Programme, die hier installiert sind
           user create <Name> [--admin] [--password-stdin]
                                           lokalen Benutzer anlegen und Profil sofort erzeugen
           learn start [--machine] [--exclude <Muster;Muster>]
@@ -70,12 +76,18 @@ internal static class HelpText
           capture --out <folder> --name <name> (--modules a,b | --installed) [--user <name>] [--zip]
                                           capture a profile; modules as list or pattern (windows.*),
                                           --installed = every installed program that has a rule
+          collect --out <folder|\\server\share> [--user <name>] [--name <name>] [--only <pattern>] [--no-windows] [--zip]
+                                          collector for the source computer (also straight from a share):
+                                          every installed program with a rule + Windows + inventory
+          compare --profile <folder|.pkprofile>
+                                          compare with this computer: installed / installable / missing
           info --profile <folder|.pkprofile>
                                           show the contents of a profile
           apply --profile <folder|.pkprofile>
                 (--current-user | --user <name> | --default-user | --create-user <name>)
-                [--install] [--only <pattern>] [--dry-run] [--no-backup] [--no-machine]
-                                          apply a profile; --install installs missing programs
+                [--install | --installed-only] [--only <pattern>] [--dry-run] [--no-backup] [--no-machine]
+                                          apply a profile; --install installs missing programs,
+                                          --installed-only only programs installed here
           user create <name> [--admin] [--password-stdin]
                                           create a local user and its profile right away
           learn start [--machine] [--exclude <pattern;pattern>]

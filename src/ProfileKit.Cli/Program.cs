@@ -37,6 +37,8 @@ try
         "catalog" => commands.Catalog(),
         "inventory" => commands.Inventory(),
         "capture" => commands.Capture(),
+        "collect" => commands.Collect(),
+        "compare" => commands.Compare(),
         "info" => commands.Info(),
         "apply" => commands.Apply(),
         "mcp" => Sub(1) switch

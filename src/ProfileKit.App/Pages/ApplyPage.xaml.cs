@@ -72,6 +72,16 @@ public sealed partial class ApplyPage : Page
 
     private void Target_Changed(object sender, RoutedEventArgs e) => UpdateTargetUi();
 
+    // "Fehlende installieren" und "nur hier installierte" schließen sich aus
+    private void Install_Checked(object sender, RoutedEventArgs e) { if (InstalledOnlyBox is not null) InstalledOnlyBox.IsChecked = false; }
+    private void InstalledOnly_Checked(object sender, RoutedEventArgs e) { if (InstallBox is not null) InstallBox.IsChecked = false; }
+
+    private async void Compare_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(ProfileBox.Text)) return;
+        await App.Window!.RunCliAsync(["compare", "--profile", ProfileBox.Text.Trim()]);
+    }
+
     private void UpdateTargetUi()
     {
         if (UserBox is null) return; // während InitializeComponent
@@ -107,6 +117,7 @@ public sealed partial class ApplyPage : Page
 
         if (selected.Count < _modules.Count) { args.Add("--only"); args.Add(string.Join(',', selected)); }
         if (InstallBox.IsChecked == true) args.Add("--install");
+        else if (InstalledOnlyBox.IsChecked == true) args.Add("--installed-only");
         if (BackupBox.IsChecked != true) args.Add("--no-backup");
         if (MachineBox.IsChecked != true) args.Add("--no-machine");
         if (DryRunBox.IsChecked == true) args.Add("--dry-run");

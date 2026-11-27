@@ -82,6 +82,21 @@ public sealed partial class CapturePage : Page
         if (await Pickers.PickFolderAsync(App.Window!) is { } folder) FolderBox.Text = folder;
     }
 
+    /// <summary>Sammler: alle installierten Programme mit Regel + Windows + Inventar (SPEC 4.6).</summary>
+    private async void Collect_Click(object sender, RoutedEventArgs e)
+    {
+        var folder = FolderBox.Text.Trim().TrimEnd('\\');
+        var parent = Path.GetDirectoryName(folder);
+        var leaf = Path.GetFileName(folder);
+        if (string.IsNullOrEmpty(parent) || string.IsNullOrEmpty(leaf)) { await App.Window!.ShowMessageAsync(Localizer.T("ui-capture-title"), Localizer.T("ui-no-folder")); return; }
+
+        var args = new List<string> { "collect", "--out", parent, "--name", leaf };
+        if (SourceBox.SelectedIndex > 0 && SourceBox.SelectedItem is string user) { args.Add("--user"); args.Add(user); }
+        if (ZipBox.IsChecked == true) args.Add("--zip");
+        (UiSettings.Load() with { LastProfileFolder = parent }).Save();
+        await App.Window!.RunCliAsync(args);
+    }
+
     private async void Start_Click(object sender, RoutedEventArgs e)
     {
         var selected = _modules.Where(m => m.IsSelected).Select(m => m.Id).ToList();

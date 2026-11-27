@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using ProfileKit.Core.Catalog;
+using ProfileKit.Core.Inventory;
 using ProfileKit.Core.Learning;
 using ProfileKit.Core.Model;
 using ProfileKit.Core.Packaging;
@@ -97,6 +98,13 @@ internal sealed class Commands(CliArgs args)
         if (rules.Count == 0) { Console.Error.WriteLine(T("no-modules")); return ExitCodes.Error; }
 
         using var source = args.Get("user") is { } user ? UserTarget.OpenUser(user, writable: false) : UserTarget.OpenCurrent();
+        return CaptureRules(source, outDir, name, rules, versions, inventory: null);
+    }
+
+    /// <summary>Gemeinsamer Kern von capture und collect: Module erfassen, Manifest, LIESMICH, optional Archiv.</summary>
+    private int CaptureRules(UserTarget source, string outDir, string name, IReadOnlyList<ModuleRule> rules,
+        IReadOnlyDictionary<string, string?> versions, MachineInventory? inventory)
+    {
         var package = new ProfilePackage(outDir);
         Console.WriteLine(T("capture-start", name, source.Describe(), package.Root));
 
@@ -126,6 +134,7 @@ internal sealed class Commands(CliArgs args)
             Modules = entries,
         };
         package.WriteManifest(manifest);
+        inventory?.Write(package);
         WriteReadme(package, manifest);
         Console.WriteLine(T("capture-done", entries.Count));
         if (manifest.ContainsKeyfiles)
@@ -139,6 +148,100 @@ internal sealed class Commands(CliArgs args)
         }
         return warnings > 0 ? ExitCodes.Partial : ExitCodes.Ok;
     }
+
+    // -------------------------------------------------------------- collect
+
+    /// <summary>
+    /// Sammler (SPEC 4.6): auf dem Quellrechner, auch direkt von einer Netzwerkfreigabe gestartet. Erfasst alle
+    /// installierten Programme mit Regel plus Windows-Einstellungen und legt das Inventar daneben.
+    /// </summary>
+    public int Collect()
+    {
+        var outRoot = args.Require("out");
+        var catalog = LoadCatalog();
+        using var source = args.Get("user") is { } user ? UserTarget.OpenUser(user, writable: false) : UserTarget.OpenCurrent();
+
+        IReadOnlyList<InstalledPackage> winget = [];
+        try { winget = new WingetClient().ListInstalled(); }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException or TimeoutException or System.ComponentModel.Win32Exception)
+        {
+            Console.Error.WriteLine(T("warning", T("collect-no-winget", ex.Message)));
+        }
+        var programs = UninstallInventory.Read(source.Registry, source.Context);
+        Console.WriteLine(T("collect-inventory", winget.Count, programs.Count));
+
+        var rules = InventoryMatcher.RulesForInstalled(catalog.Rules, winget, programs).ToList();
+        if (!args.Has("no-windows")) rules.AddRange(catalog.Rules.Where(r => r.IsWindowsModule));
+        var filter = new ModuleFilter(args.Get("only"));
+        rules = rules.Where(r => filter.Matches(r.Id)).OrderBy(r => r.Id, StringComparer.OrdinalIgnoreCase).ToList();
+        if (rules.Count == 0) { Console.Error.WriteLine(T("no-modules")); return ExitCodes.Error; }
+
+        var name = args.Get("name") ?? $"{Environment.MachineName}_{source.Context.UserName}";
+        if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new CliException(T("invalid-name", name));
+        var outDir = Path.Combine(outRoot, name);
+        var inventory = new MachineInventory
+        {
+            Machine = Environment.MachineName,
+            UserName = source.Context.UserName,
+            Winget = winget.ToList(),
+            Programs = programs.ToList(),
+        };
+        var versions = winget.ToDictionary(p => p.Id, p => p.Version, StringComparer.OrdinalIgnoreCase);
+        var code = CaptureRules(source, outDir, name, rules, versions, inventory);
+
+        var uncovered = InventoryMatcher.Uncovered(programs, catalog.Rules);
+        Console.WriteLine(T("collect-uncovered", uncovered.Count));
+        foreach (var p in uncovered.Take(args.Has("verbose") ? int.MaxValue : 25)) Console.WriteLine("  - " + p.Name);
+        if (uncovered.Count > 0)
+            Console.WriteLine(T("collect-uncovered-hint", Path.Combine(outDir, MachineInventory.WingetExportFileName)));
+        return code;
+    }
+
+    // -------------------------------------------------------------- compare
+
+    /// <summary>Abgleich eines Profils mit dem Zielrechner: was ist installiert, was installierbar, was fehlt?</summary>
+    public int Compare()
+    {
+        var package = ProfilePackage.Open(args.Require("profile"));
+        var manifest = package.ReadManifest();
+        var (winget, programs) = TargetInventory();
+
+        var presence = InventoryMatcher.Compare(manifest.Modules, winget, programs);
+        Console.WriteLine(T("compare-header", manifest.Name, manifest.Source.UserName, manifest.Source.Machine, Environment.MachineName));
+        foreach (var p in presence.OrderBy(p => p.Presence).ThenBy(p => p.Module.Id, StringComparer.OrdinalIgnoreCase))
+            Console.WriteLine($"  {PresenceLabel(p.Presence),-26} {p.Module.Id,-24} {p.MatchedBy ?? p.Module.WingetId ?? ""}");
+        Console.WriteLine(T("compare-summary",
+            presence.Count(p => p.Presence == Presence.Installed), presence.Count(p => p.Presence == Presence.Installable),
+            presence.Count(p => p.Presence == Presence.Missing), presence.Count(p => p.Presence == Presence.Windows)));
+
+        if (MachineInventory.TryRead(package) is { } sourceInventory)
+        {
+            var uncovered = InventoryMatcher.Uncovered(sourceInventory.Programs, LoadCatalog().Rules);
+            Console.WriteLine(T("compare-source-uncovered", uncovered.Count));
+            foreach (var p in uncovered.Take(args.Has("verbose") ? int.MaxValue : 25)) Console.WriteLine("  - " + p.Name);
+        }
+        return ExitCodes.Ok;
+    }
+
+    private static (IReadOnlyList<InstalledPackage> Winget, IReadOnlyList<UninstallEntry> Programs) TargetInventory()
+    {
+        IReadOnlyList<InstalledPackage> winget = [];
+        try { winget = new WingetClient().ListInstalled(); }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException or TimeoutException or System.ComponentModel.Win32Exception)
+        {
+            Console.Error.WriteLine(T("warning", T("collect-no-winget", ex.Message)));
+        }
+        using var registry = WindowsRegistryBackend.ForCurrentUser();
+        return (winget, UninstallInventory.Read(registry));
+    }
+
+    private static string PresenceLabel(Presence p) => p switch
+    {
+        Presence.Installed => T("presence-installed"),
+        Presence.Installable => T("presence-installable"),
+        Presence.Missing => T("presence-missing"),
+        _ => T("presence-windows"),
+    };
 
     private IEnumerable<string> RequestedIds() =>
         (args.Get("modules") ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -163,6 +266,16 @@ internal sealed class Commands(CliArgs args)
         var manifest = package.ReadManifest();
         var filter = new ModuleFilter(args.Get("only"));
         var modules = manifest.Modules.Where(m => filter.Matches(m.Id)).ToList();
+        if (args.Has("installed-only"))
+        {
+            // Zielrechner bestimmt: nur Einstellungen für Programme, die hier schon installiert sind
+            if (args.Has("install")) throw new CliException(T("installed-only-conflict"));
+            var (targetWinget, targetPrograms) = TargetInventory();
+            var presence = InventoryMatcher.Compare(modules, targetWinget, targetPrograms);
+            foreach (var p in presence.Where(p => p.Presence is Presence.Installable or Presence.Missing))
+                Console.WriteLine(T("installed-only-skipped", p.Module.Id));
+            modules = presence.Where(p => p.Presence is Presence.Installed or Presence.Windows).Select(p => p.Module).ToList();
+        }
         if (modules.Count == 0) { Console.Error.WriteLine(T("no-modules")); return ExitCodes.Error; }
 
         var dryRun = args.Has("dry-run");

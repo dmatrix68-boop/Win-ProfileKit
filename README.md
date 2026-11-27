@@ -9,7 +9,7 @@ Testbenutzer auf Installations-VMs und für den OEM-Skriptlauf
 ([OEM-script-gen](https://github.com/dmatrix68-boop/OEM-script-gen)).
 
 > Status: Core + CLI, Lernmodus, MCP-Server, KI-Anbindung und WinUI-3-Oberfläche.
-> Sammler über Netzwerkfreigabe und VHDX-Quelle folgen – siehe [SPEC.md](SPEC.md).
+> VHDX-Quelle und Einbindung in den OEM-Skriptgenerator folgen – siehe [SPEC.md](SPEC.md).
 
 ## Funktionen (Phase 1)
 
@@ -58,6 +58,13 @@ profilekit capture --out D:\Profile\Alles --installed --modules windows.* --zip
 
 :: auf einen neuen Testbenutzer anwenden, fehlende Programme installieren (als Administrator)
 profilekit apply --profile \\nas\profile\Dev --create-user test1 --admin --install
+
+:: Umzug über eine Netzwerkfreigabe – auf dem alten Rechner (direkt von der Freigabe gestartet):
+\\nas\tools\profilekit.exe collect --out \\nas\profile
+:: … auf dem neuen Rechner: abgleichen, dann Fehlendes installieren oder nur Vorhandenes konfigurieren
+profilekit compare --profile \\nas\profile\ALT-PC_max
+profilekit apply --profile \\nas\profile\ALT-PC_max --current-user --install
+profilekit apply --profile \\nas\profile\ALT-PC_max --current-user --installed-only
 
 :: im OEM-Lauf (Phase 2, Benutzerkontext)
 profilekit apply --profile C:\Install\ProfileKit\Profiles\Dev --current-user --install

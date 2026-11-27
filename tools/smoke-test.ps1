@@ -172,5 +172,24 @@ Assert-True ($planOut -match 'KI-Suche\s+contoso\.phototool') 'Stapelmodus: Prog
 Assert-True ($planOut -match 'Regel vorhanden\s+7zip') 'Stapelmodus: 7-Zip hat eine Regel'
 Assert-True ($planOut -match 'ohne Einstellungen') 'Stapelmodus: Runtime übersprungen'
 
+# --- Sammler (wie von einer Netzwerkfreigabe) und Abgleich ------------------------------
+$share = Join-Path $Work 'share'
+New-Item $share -ItemType Directory -Force | Out-Null
+Invoke-Pk @('collect', '--out', $share, '--name', 'SMOKE_collect') -Allowed 0,2
+$collected = Join-Path $share 'SMOKE_collect'
+Assert-True (Test-Path (Join-Path $collected 'profile.json')) 'Sammler: Profil geschrieben'
+Assert-True (Test-Path (Join-Path $collected 'inventory.json')) 'Sammler: Inventar geschrieben'
+Assert-True (Test-Path (Join-Path $collected 'winget-export.json')) 'Sammler: winget-Export geschrieben'
+if (Test-Path (Join-Path $collected 'profile.json')) {
+    $m = Get-Content (Join-Path $collected 'profile.json') -Raw | ConvertFrom-Json
+    Assert-True ($m.modules.id -contains 'windows.mouse') "Sammler: Windows-Module enthalten ($($m.modules.Count) Module: $($m.modules.id -join ', '))"
+    $inv = Get-Content (Join-Path $collected 'inventory.json') -Raw | ConvertFrom-Json
+    Assert-True ($inv.programs.Count -gt 5) "Sammler: $($inv.programs.Count) installierte Programme, $($inv.winget.Count) winget-Pakete"
+}
+Invoke-Pk @('compare', '--profile', $collected)
+Invoke-Pk @('apply', '--profile', $collected, '--current-user', '--installed-only', '--dry-run')
+& $Exe apply --profile $collected --current-user --installed-only --install --dry-run --lang de 2>&1 | Out-Null
+Assert-True ($LASTEXITCODE -eq 3) '--installed-only und --install schließen sich aus'
+
 if ($failures -gt 0) { Write-Host "`n$failures Fehler" -ForegroundColor Red; exit 1 }
 Write-Host "`nAlle Smoke-Tests bestanden." -ForegroundColor Green

@@ -60,13 +60,6 @@ public static class AgentTools
     private const int MaxListEntries = 300;
     private const int DefaultReadBytes = 32 * 1024;
 
-    private static readonly string[] UninstallKeys =
-    [
-        @"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
-        @"HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall",
-        @"HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall",
-    ];
-
     public static IReadOnlyList<AgentTool> Create(AgentContext ctx) =>
     [
         new("list_installed_apps",
@@ -113,31 +106,11 @@ public static class AgentTools
 
     private static ToolResult ListInstalledApps(AgentContext ctx, string? filter)
     {
-        var apps = new List<object>();
-        foreach (var root in UninstallKeys)
-        {
-            foreach (var sub in ctx.Registry.GetSubKeyNames(root))
-            {
-                var key = root + "\\" + sub;
-                var values = ctx.Registry.Read(key, ["DisplayName", "DisplayVersion", "Publisher", "InstallLocation", "SystemComponent"], false)
-                    .ToDictionary(v => v.Name, StringComparer.OrdinalIgnoreCase);
-                if (!values.TryGetValue("DisplayName", out var name) || string.IsNullOrWhiteSpace(name.Text)) continue;
-                if (values.TryGetValue("SystemComponent", out var sys) && sys.Number == 1) continue;
-                var publisher = values.GetValueOrDefault("Publisher")?.Text;
-                if (filter is not null && !Contains(name.Text, filter) && !Contains(publisher, filter)) continue;
-
-                var location = values.GetValueOrDefault("InstallLocation")?.Text?.Trim('"');
-                apps.Add(new
-                {
-                    name = name.Text,
-                    version = values.GetValueOrDefault("DisplayVersion")?.Text,
-                    publisher,
-                    installLocation = string.IsNullOrWhiteSpace(location) ? null : PathTokens.TryTokenize(location, ctx.User) ?? location,
-                    uninstallKey = key,
-                });
-                if (apps.Count >= MaxListEntries) break;
-            }
-        }
+        var apps = Inventory.UninstallInventory.Read(ctx.Registry, ctx.User)
+            .Where(e => filter is null || Contains(e.Name, filter) || Contains(e.Publisher, filter))
+            .Take(MaxListEntries)
+            .Select(e => new { name = e.Name, version = e.Version, publisher = e.Publisher, installLocation = e.InstallLocation, uninstallKey = e.Key })
+            .ToList();
 
         IEnumerable<string>? winget = null;
         try { winget = ctx.WingetInventory?.Invoke().Select(p => p.Id).Where(id => filter is null || Contains(id, filter)).ToList(); }

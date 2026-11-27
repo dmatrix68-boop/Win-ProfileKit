@@ -167,10 +167,17 @@ Version 1. Live-Aktivierung über `postApply`-Hinweise der Module.
 
 ### 4.6 Quellen
 1. **Lokal** – Tool läuft auf dem Quellrechner.
-2. **Sammler über Freigabe** – `profilekit.exe collect` wird auf dem Quellrechner direkt
-   von der Freigabe gestartet (keine Installation) und schreibt Inventar, Registry-Auszug
-   und Dateien in die Freigabe. Am neuen Rechner: Abgleich mit dessen Inventar,
-   fehlende Programme anbieten, dann Einstellungen anwenden.
+2. **Sammler über Freigabe** ✅ – `profilekit.exe collect --out \\server\freigabe` wird auf dem
+   Quellrechner direkt von der Freigabe gestartet (keine Installation) und schreibt nach
+   `<Freigabe>\<Rechner>_<Benutzer>`: ein Profil mit allen installierten Programmen, für die es eine
+   Regel gibt (Abgleich per winget-ID, sonst Programmname aus „Apps & Features“), plus
+   Windows-Module, dazu `inventory.json` (winget-Pakete und Uninstall-Einträge) und
+   `winget-export.json` (für den OEM-Skriptgenerator oder `ai discover --from-winget`). Am Ende
+   listet der Sammler installierte Programme ohne Regel.
+   Am neuen Rechner zeigt `profilekit compare --profile …` je Modul: installiert / per winget
+   installierbar / fehlt. Danach entweder **Quelle bestimmt** (`apply --install`: Fehlendes
+   installieren, alles konfigurieren) oder **Ziel bestimmt** (`apply --installed-only`: nur
+   Einstellungen für Programme, die dort schon installiert sind).
 3. **Offline-Datenträger** – VHDX einer heruntergefahrenen Hyper-V-VM wird
    schreibgeschützt eingebunden; Hives (`NTUSER.DAT`, `SOFTWARE`) werden offline geladen.
 4. **Reine Freigabe** (`\\rechner\C$`) – nur Dateien; Registry nur, wenn der Benutzer
@@ -305,10 +312,12 @@ profilekit inventory [--out datei.json]            installierte Software + passe
 profilekit catalog                                 Regelkatalog anzeigen
 profilekit capture  --out <Ordner> --name <Name> (--modules a,b | --installed)
                     [--user <Name>]
+profilekit collect  --out <Ordner|\\Server\Freigabe> [--user <Name>] [--name <Name>] [--only <Muster>] [--no-windows] [--zip]
+profilekit compare  --profile <Ordner>
 profilekit info     --profile <Ordner>
 profilekit apply    --profile <Ordner>
                     (--current-user | --user <Name> | --default-user | --create-user <Name>)
-                    [--install] [--only <muster>] [--dry-run] [--no-backup]
+                    [--install | --installed-only] [--only <muster>] [--dry-run] [--no-backup]
 profilekit user create <Name> [--admin] [--password-stdin]
 profilekit learn start [--machine] [--exclude <Muster;Muster>]
 profilekit learn diff
@@ -326,7 +335,7 @@ Global: --lang de|en, --rules <Ordner>, --verbose
 | Phase | Inhalt |
 |---|---|
 | **1** | Core, Windows-Schicht, CLI: Katalog, Inventar, Capture, Apply (alle Zielarten), Benutzer anlegen, Windows-Module, CI |
-| **2** | Lernmodus ✅, Sammler über Freigabe, Offline-VHDX, Abgleich Quelle/Ziel |
+| **2** | Lernmodus ✅, Sammler über Freigabe ✅, Abgleich Quelle/Ziel ✅, Offline-VHDX |
 | **3** | MCP-Server ✅, KI-Stufen 1a (Claude Desktop) ✅ / 1b (Claude Code) ✅ / 2 ✅ / 3 ✅, Regelvorschläge mit Validierung ✅ |
 | **4** | WinUI-3-Oberfläche (DE/EN) ✅ – Übersicht, Erfassen, Anwenden, Lernmodus, KI-Suche mit Vorschlägen, Einstellungen |
 | **5** | Integration in den OEM-Skriptgenerator (eigener PR dort) |
