@@ -242,6 +242,13 @@ if (Test-Path (Join-Path $vmProfileOut 'profile.json')) {
     Assert-True $false 'VHDX: Profil geschrieben'
 }
 
+# --- Konto ohne Profil (wie aus der autounattend.xml) ------------------------------------
+net user pktest2 'Pk!Smoke-2026' /add | Out-Null
+Invoke-Pk @('apply', '--profile', $profileDir, '--user', 'pktest2', '--only', 'smoke.test') -Allowed 0,2
+$p2 = (Get-CimInstance Win32_UserProfile | Where-Object { $_.LocalPath -like '*\pktest2' }).LocalPath
+Assert-True ([bool]$p2) "Profil für Konto ohne Anmeldung erzeugt ($p2)"
+if ($p2) { Assert-True (Test-Path (Join-Path $p2 'AppData\Roaming\ProfileKitSmoke\conf.ini')) 'Einstellungen beim Konto ohne Anmeldung angekommen' }
+
 if ($failures -gt 0) { Write-Host "`n$failures Fehler" -ForegroundColor Red; exit 1 }
 Write-Host "`nAlle Smoke-Tests bestanden." -ForegroundColor Green
 # Ausdrücklich 0: GitHub Actions beendet pwsh-Schritte sonst mit dem letzten $LASTEXITCODE

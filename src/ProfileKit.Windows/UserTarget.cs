@@ -64,7 +64,9 @@ public sealed class UserTarget : IDisposable
     /// <summary>Öffnet einen Benutzer anhand des Namens. Für andere Benutzer sind Adminrechte nötig.</summary>
     public static UserTarget OpenUser(string userName, bool writable)
     {
+        // Konto ohne Profil (noch nie angemeldet, z. B. aus der autounattend.xml): Profil beim Schreiben erzeugen
         var profile = UserProfiles.Find(userName)
+            ?? (writable && LocalUsers.EnsureProfile(userName) is not null ? UserProfiles.Find(userName) : null)
             ?? throw new ArgumentException($"Benutzer '{userName}' hat kein Profil auf diesem Rechner.", nameof(userName));
 
         using (var identity = WindowsIdentity.GetCurrent())

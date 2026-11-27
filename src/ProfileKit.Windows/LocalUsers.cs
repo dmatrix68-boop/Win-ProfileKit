@@ -48,6 +48,29 @@ public static class LocalUsers
         return buffer.Length > 0 ? buffer.ToString() : UserProfiles.List().First(p => p.Sid == sid).ProfilePath;
     }
 
+    /// <summary>
+    /// Erzeugt das Profil eines vorhandenen Kontos, das sich noch nie angemeldet hat (z. B. per autounattend.xml
+    /// angelegt). Liefert den Profilpfad oder null, wenn es kein solches lokales Konto gibt.
+    /// </summary>
+    public static string? EnsureProfile(string userName)
+    {
+        string sid;
+        try { sid = ((SecurityIdentifier)new NTAccount(Environment.MachineName, userName).Translate(typeof(SecurityIdentifier))).Value; }
+        catch (IdentityNotMappedException) { return null; }
+
+        var existing = UserProfiles.List().FirstOrDefault(p => p.Sid == sid);
+        if (existing is not null) return existing.ProfilePath;
+        if (!UserProfiles.IsAdministrator())
+            throw new UnauthorizedAccessException("Zum Erzeugen eines Profils sind Administratorrechte nötig.");
+
+        var buffer = new StringBuilder(260);
+        var hr = NativeMethods.CreateProfile(sid, userName, buffer, (uint)buffer.Capacity);
+        const int alreadyExists = unchecked((int)0x800700B7);
+        if (hr != 0 && hr != alreadyExists)
+            throw new Win32Exception(hr, $"Profil für '{userName}' konnte nicht erzeugt werden (CreateProfile 0x{hr:X8}).");
+        return buffer.Length > 0 ? buffer.ToString() : UserProfiles.List().First(p => p.Sid == sid).ProfilePath;
+    }
+
     /// <summary>Fügt den Benutzer einer Gruppe hinzu; der Gruppenname wird über die SID aufgelöst (sprachunabhängig).</summary>
     private static void AddToGroup(string userName, string groupSid)
     {

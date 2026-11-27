@@ -293,6 +293,8 @@ Repository: `dmatrix68-boop/OEM-script-gen`.
 * **Phase 2** (Benutzerkontext, nach `Install-Apps.ps1`): neues Modul
   `Restore-Profile.ps1` ruft `profilekit apply --profile <Pfad> --current-user` auf.
 * Erledigt-Marker unter `HKLM\SOFTWARE\OEM-Setup`, wie bei den übrigen Phasen.
+* Konten aus der `autounattend.xml`, die sich noch nie angemeldet haben, haben noch kein Profil:
+  `apply --user <Name>` erzeugt es dann selbst (wie `--create-user`), statt abzubrechen.
 * Die CLI ist eine **self-contained Single-File-EXE** (keine .NET-Runtime auf dem
   frisch installierten System nötig) und arbeitet ohne Oberfläche und ohne Rückfragen.
   Exitcodes: `0` OK, `1` Fehler, `2` Teilerfolg, `3` ungültige Argumente.
