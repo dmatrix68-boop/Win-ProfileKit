@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="ProfileKit.App.Pages.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:l="using:ProfileKit.App">
+    <ScrollViewer>
+        <StackPanel Spacing="8" MaxWidth="720" HorizontalAlignment="Left">
+            <TextBlock Text="{l:Loc Key=ui-nav-settings}" Style="{StaticResource PageTitle}" />
+
+            <TextBlock Text="{l:Loc Key=ui-settings-language}" Style="{StaticResource SectionTitle}" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <ComboBox x:Name="LanguageBox" MinWidth="200">
+                    <ComboBoxItem Content="Deutsch" Tag="de" />
+                    <ComboBoxItem Content="English" Tag="en" />
+                </ComboBox>
+                <Button Content="{l:Loc Key=ui-settings-apply-language}" Click="Language_Click" />
+            </StackPanel>
+
+            <TextBlock Text="{l:Loc Key=ui-settings-ai}" Style="{StaticResource SectionTitle}" />
+            <ComboBox x:Name="ProviderBox" Header="{l:Loc Key=ui-ai-provider}" MinWidth="240">
+                <x:String>auto</x:String>
+                <x:String>claude-code</x:String>
+                <x:String>ollama</x:String>
+                <x:String>openrouter</x:String>
+            </ComboBox>
+            <TextBox x:Name="OllamaUrlBox" Header="{l:Loc Key=ui-settings-ollama-url}" PlaceholderText="http://localhost:11434" />
+            <TextBox x:Name="OllamaModelBox" Header="{l:Loc Key=ui-settings-ollama-model}" PlaceholderText="qwen3" />
+            <TextBox x:Name="OpenRouterModelBox" Header="{l:Loc Key=ui-settings-openrouter-model}" PlaceholderText="provider/model" />
+            <NumberBox x:Name="MaxStepsBox" Header="{l:Loc Key=ui-settings-max-steps}" Minimum="5" Maximum="100" SpinButtonPlacementMode="Compact" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="{l:Loc Key=ui-save}" Click="SaveAi_Click" Style="{StaticResource AccentButtonStyle}" />
+                <Button Content="{l:Loc Key=ui-settings-models-ollama}" Click="ModelsOllama_Click" />
+                <Button Content="{l:Loc Key=ui-settings-models-openrouter}" Click="ModelsOpenRouter_Click" />
+                <Button Content="{l:Loc Key=ui-settings-status}" Click="Status_Click" />
+            </StackPanel>
+
+            <TextBlock Text="OpenRouter" Style="{StaticResource SectionTitle}" />
+            <InfoBar IsOpen="True" IsClosable="False" Severity="Warning" Message="{l:Loc Key=ai-cloud-warning}" />
+            <ToggleSwitch x:Name="ConsentSwitch" Header="{l:Loc Key=ui-settings-consent}" />
+            <PasswordBox x:Name="KeyBox" Header="{l:Loc Key=ui-settings-key}" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="{l:Loc Key=ui-settings-key-save}" Click="SaveKey_Click" />
+                <Button Content="{l:Loc Key=ui-settings-key-remove}" Click="RemoveKey_Click" />
+                <TextBlock x:Name="KeyState" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+
+            <TextBlock Text="{l:Loc Key=ui-settings-mcp}" Style="{StaticResource SectionTitle}" />
+            <TextBlock Text="{l:Loc Key=ui-settings-mcp-text}" TextWrapping="Wrap" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="{l:Loc Key=ui-settings-mcp-install}" Click="McpInstall_Click" />
+                <Button Content="{l:Loc Key=ui-settings-mcp-uninstall}" Click="McpUninstall_Click" />
+                <Button Content="{l:Loc Key=ui-settings-mcp-config}" Click="McpConfig_Click" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

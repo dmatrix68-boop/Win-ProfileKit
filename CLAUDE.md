@@ -20,6 +20,7 @@ OEM-Skriptlauf). Verwandtes Repo: `dmatrix68-boop/OEM-script-gen`.
 | `src/ProfileKit.Core` | plattformneutrale Logik – **keine** Windows-APIs hier |
 | `src/ProfileKit.Windows` | Registry, Offline-Hives, Benutzer, winget, P/Invoke |
 | `src/ProfileKit.Cli` | `profilekit.exe` |
+| `src/ProfileKit.App` | WinUI-3-Oberfläche `profilekit-gui.exe` – liest über Core/Windows, führt Aktionen über `profilekit.exe` aus |
 | `tests/ProfileKit.Core.Tests` | xUnit-Tests für Core |
 | `rules/apps`, `rules/windows` | Regelkatalog (JSON, eine Datei je Modul) |
 
@@ -31,6 +32,11 @@ Ziel ist .NET 10. Die Zielplattform steht in `Directory.Build.props` (`PkTfm`).
 dotnet build ProfileKit.sln
 dotnet test tests/ProfileKit.Core.Tests
 ```
+
+Die Oberfläche (`src/ProfileKit.App`) ist nicht in `ProfileKit.sln`: Der XAML-Compiler läuft nur unter
+Windows. Sie wird im CI-Job `gui` gebaut und beim Start geprüft (`tools/gui-startup-test.ps1`).
+Texte der Oberfläche stehen in `src/ProfileKit.Core/Text/LocalizerUi.cs`; in XAML `{l:Loc Key=…}`.
+Ein Test prüft, dass jeder verwendete Schlüssel in beiden Sprachen existiert.
 
 Im Linux-Container gibt es nur das .NET-8-SDK aus den Ubuntu-Paketen; dort mit
 `-p:PkTfm=net8.0` bauen und testen. Windows-Projekte bauen dank

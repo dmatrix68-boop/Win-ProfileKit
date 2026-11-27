@@ -8,8 +8,8 @@ Benutzer** an – inklusive winget-Installation fehlender Programme. Gedacht fü
 Testbenutzer auf Installations-VMs und für den OEM-Skriptlauf
 ([OEM-script-gen](https://github.com/dmatrix68-boop/OEM-script-gen)).
 
-> Status: Core + CLI, Lernmodus, MCP-Server und KI-Anbindung. WinUI-Oberfläche und
-> Sammler über Netzwerkfreigabe folgen – siehe [SPEC.md](SPEC.md).
+> Status: Core + CLI, Lernmodus, MCP-Server, KI-Anbindung und WinUI-3-Oberfläche.
+> Sammler über Netzwerkfreigabe und VHDX-Quelle folgen – siehe [SPEC.md](SPEC.md).
 
 ## Funktionen (Phase 1)
 
@@ -34,6 +34,18 @@ Testbenutzer auf Installations-VMs und für den OEM-Skriptlauf
 * **winget**: fehlende Programme vor dem Konfigurieren installieren (`--install`).
 * **Sicherung** vorhandener Dateien und Werte vor dem Überschreiben, **Trockenlauf** mit `--dry-run`.
 * Zweisprachig (DE/EN), Profil als Ordner oder `.pkprofile`-Archiv.
+
+## Oberfläche
+
+`profilekit-gui.exe` (WinUI 3) bietet dieselben Funktionen mit Fenstern: Profil erfassen
+(Programme ankreuzen, „Installierte markieren“), Profil anwenden (aktueller, anderer, neuer Benutzer
+oder Default-Profil, mit Trockenlauf), Lernmodus, KI-Suche mit Stapelmodus und Vorschlagsliste sowie
+die Einstellungen für KI-Stufen, OpenRouter-Key und Claude Desktop. Alle Aktionen laufen über
+`profilekit.exe`, deren Ausgabe im Protokoll unten erscheint. Ohne Administratorrechte bietet die
+Oberfläche einen Neustart als Administrator an.
+
+Download: Artefakt `profilekit-gui-win-x64` der CI (Ordner entpacken, `profilekit-gui.exe` starten –
+keine Installation nötig).
 
 ## Beispiele
 

@@ -39,3 +39,33 @@ jobs:
         with:
           name: profilekit-win-x64
           path: artifacts/profilekit
+
+  gui:
+    # Eigener Job: Die WinUI-Oberfläche baut nur unter Windows und blockiert so nicht die CLI.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Publish GUI (WinUI 3, unpackaged, self-contained)
+        run: >
+          dotnet publish src/ProfileKit.App -c Release -r win-x64 -p:Platform=x64 --self-contained
+          -o artifacts/profilekit-gui
+
+      - name: Add CLI next to the GUI
+        run: >
+          dotnet publish src/ProfileKit.Cli -c Release -r win-x64 --self-contained
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          -o artifacts/profilekit-gui
+
+      - name: Startup test
+        shell: pwsh
+        run: ./tools/gui-startup-test.ps1 -Exe ./artifacts/profilekit-gui/profilekit-gui.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: profilekit-gui-win-x64
+          path: artifacts/profilekit-gui

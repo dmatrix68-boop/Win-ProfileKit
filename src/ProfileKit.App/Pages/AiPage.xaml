@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="ProfileKit.App.Pages.AiPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:l="using:ProfileKit.App"
+    xmlns:s="using:ProfileKit.App.Services">
+    <Grid ColumnSpacing="24" RowSpacing="8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="380" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.ColumnSpan="2" Spacing="4">
+            <TextBlock Text="{l:Loc Key=ui-ai-title}" Style="{StaticResource PageTitle}" />
+            <TextBlock Text="{l:Loc Key=ui-ai-intro}" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="8">
+                <ComboBox x:Name="ProviderBox" Header="{l:Loc Key=ui-ai-provider}" MinWidth="240">
+                    <x:String>auto</x:String>
+                    <x:String>claude-code</x:String>
+                    <x:String>ollama</x:String>
+                    <x:String>openrouter</x:String>
+                </ComboBox>
+                <TextBox x:Name="ModelBox" Header="{l:Loc Key=ui-ai-model}" PlaceholderText="{l:Loc Key=ui-ai-model-hint}" />
+
+                <TextBlock Text="{l:Loc Key=ui-ai-single}" Style="{StaticResource SectionTitle}" />
+                <TextBox x:Name="ProgramBox" Header="{l:Loc Key=ui-ai-program}" PlaceholderText="WizTree" />
+                <TextBox x:Name="WingetBox" Header="{l:Loc Key=ui-learn-winget}" PlaceholderText="AntibodySoftware.WizTree" />
+                <Button Content="{l:Loc Key=ui-ai-discover}" Click="Discover_Click" Style="{StaticResource AccentButtonStyle}" />
+
+                <TextBlock Text="{l:Loc Key=ui-ai-batch}" Style="{StaticResource SectionTitle}" />
+                <TextBlock Text="{l:Loc Key=ui-ai-batch-text}" TextWrapping="Wrap" />
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="BatchFileBox" Header="{l:Loc Key=ui-ai-batch-file}" />
+                    <Button Grid.Column="1" Content="{l:Loc Key=ui-browse}" Click="BrowseBatch_Click" VerticalAlignment="Bottom" />
+                </Grid>
+                <NumberBox x:Name="LimitBox" Header="{l:Loc Key=ui-ai-limit}" Minimum="0" Maximum="200" Value="0" SpinButtonPlacementMode="Compact" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="{l:Loc Key=ui-ai-batch-plan}" Click="BatchPlan_Click" />
+                    <Button Content="{l:Loc Key=ui-ai-batch-run}" Click="BatchRun_Click" Style="{StaticResource AccentButtonStyle}" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="1" Grid.Column="1" RowSpacing="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="{l:Loc Key=ui-ai-proposals}" Style="{StaticResource SubtitleTextBlockStyle}" VerticalAlignment="Center" />
+                <Button Content="{l:Loc Key=ui-refresh}" Click="Refresh_Click" />
+            </StackPanel>
+            <ListView x:Name="ProposalList" Grid.Row="1" SelectionMode="None" BorderThickness="1"
+                      BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="4">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="s:SelectableItem">
+                        <CheckBox IsChecked="{x:Bind IsSelected, Mode=TwoWay}">
+                            <StackPanel>
+                                <TextBlock Text="{x:Bind Title}" />
+                                <TextBlock Text="{x:Bind Subtitle}" FontSize="12" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </CheckBox>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
+                <Button Content="{l:Loc Key=ui-ai-show}" Click="Show_Click" />
+                <Button Content="{l:Loc Key=ui-ai-accept}" Click="Accept_Click" Style="{StaticResource AccentButtonStyle}" />
+                <Button Content="{l:Loc Key=ui-ai-reject}" Click="Reject_Click" />
+                <CheckBox x:Name="ForceBox" Content="{l:Loc Key=ui-learn-force}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Page>

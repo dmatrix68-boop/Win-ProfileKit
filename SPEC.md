@@ -286,7 +286,8 @@ src/ProfileKit.Windows   Registry, Offline-Hives (RegLoadKey), Benutzerprofile,
                          Benutzer anlegen, winget-Aufrufe, Live-Aktivierung
 src/ProfileKit.Cli       profilekit.exe – für OEM-Lauf, Skripte und Tests
 src/ProfileKit.Mcp       MCP-Server (Phase 3)
-src/ProfileKit.App       WinUI 3, unpackaged + self-contained (Phase 4)
+src/ProfileKit.App       WinUI 3 (Windows App SDK 1.8), unpackaged + self-contained; Anzeigen über
+                         Core/Windows, Aktionen über profilekit.exe (gleicher Weg wie Skripte/OEM-Lauf)
 rules/                   Regelkatalog (JSON)
 ```
 
@@ -327,7 +328,7 @@ Global: --lang de|en, --rules <Ordner>, --verbose
 | **1** | Core, Windows-Schicht, CLI: Katalog, Inventar, Capture, Apply (alle Zielarten), Benutzer anlegen, Windows-Module, CI |
 | **2** | Lernmodus ✅, Sammler über Freigabe, Offline-VHDX, Abgleich Quelle/Ziel |
 | **3** | MCP-Server ✅, KI-Stufen 1a (Claude Desktop) ✅ / 1b (Claude Code) ✅ / 2 ✅ / 3 ✅, Regelvorschläge mit Validierung ✅ |
-| **4** | WinUI-3-Oberfläche (DE/EN) |
+| **4** | WinUI-3-Oberfläche (DE/EN) ✅ – Übersicht, Erfassen, Anwenden, Lernmodus, KI-Suche mit Vorschlägen, Einstellungen |
 | **5** | Integration in den OEM-Skriptgenerator (eigener PR dort) |
 
 ## 8. Bewusst ausgeschlossen (Version 1)

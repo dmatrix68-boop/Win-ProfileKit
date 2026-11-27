@@ -6,7 +6,7 @@ namespace ProfileKit.Core.Text;
 /// Zweisprachige Texte (DE/EN). Standard ist die UI-Sprache des Systems; Deutsch für "de-*",
 /// sonst Englisch. Fehlende Schlüssel liefern den Schlüssel selbst.
 /// </summary>
-public static class Localizer
+public static partial class Localizer
 {
     public static string Language { get; private set; } =
         CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "de" ? "de" : "en";
@@ -15,6 +15,13 @@ public static class Localizer
     {
         if (string.IsNullOrWhiteSpace(language)) return;
         Language = language.StartsWith("de", StringComparison.OrdinalIgnoreCase) ? "de" : "en";
+    }
+
+    static Localizer()
+    {
+        // Texte der Oberfläche (LocalizerUi.cs) in dieselben Tabellen übernehmen
+        foreach (var (k, v) in UiDe) De[k] = v;
+        foreach (var (k, v) in UiEn) En[k] = v;
     }
 
     public static string T(string key, params object[] args)
