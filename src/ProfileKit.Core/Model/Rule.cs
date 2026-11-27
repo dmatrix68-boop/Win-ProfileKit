@@ -62,6 +62,9 @@ public sealed record RedactRule
 
     /// <summary>INI-Schlüssel, wahlweise mit Abschnitt: <c>SMTPPassword</c> (alle Abschnitte) oder <c>Generic.SMTPPassword</c>.</summary>
     public List<string> Ini { get; init; } = [];
+
+    /// <summary>XPath-Ausdrücke für XML-Dateien; gefundene Elemente bzw. Attribute werden entfernt, z. B. <c>//setting[@name='RecentFindThats']</c>.</summary>
+    public List<string> Xml { get; init; } = [];
 }
 
 /// <summary>Regel: was gehört zu einem Programm bzw. Windows-Bereich?</summary>

@@ -300,16 +300,40 @@ internal sealed class AiCommands(CliArgs args, Func<RuleCatalog> loadCatalog)
 
     public int Accept()
     {
-        var id = Positional(2, "<id>");
-        if (loadCatalog().Find(id) is { } existing && !args.Has("force"))
-            throw new CliException(T("learn-exists", id, existing.DisplayName));
-        Console.WriteLine(T("ai-accepted", Proposals.Accept(id, UserRulesDirectory)));
-        return ExitCodes.Ok;
+        var id = Positional(2, "<id> | all");
+        var catalog = loadCatalog();
+        var ids = id.Equals("all", StringComparison.OrdinalIgnoreCase)
+            ? Proposals.List().Select(p => p.Rule.Id).ToList()
+            : [id];
+        if (ids.Count == 0) { Console.WriteLine(T("ai-no-proposals")); return ExitCodes.Ok; }
+
+        var skipped = 0;
+        foreach (var current in ids)
+        {
+            if (catalog.Find(current) is { } existing && !args.Has("force"))
+            {
+                // Bei "all" überspringen statt abbrechen; einzeln wie bisher als Fehler melden
+                if (ids.Count == 1) throw new CliException(T("learn-exists", current, existing.DisplayName));
+                Console.WriteLine(T("ai-accept-skipped", current, existing.DisplayName));
+                skipped++;
+                continue;
+            }
+            Console.WriteLine(T("ai-accepted", Proposals.Accept(current, UserRulesDirectory)));
+        }
+        if (ids.Count > 1) Console.WriteLine(T("ai-accept-summary", ids.Count - skipped, ids.Count));
+        return skipped > 0 ? ExitCodes.Partial : ExitCodes.Ok;
     }
 
     public int Reject()
     {
-        var id = Positional(2, "<id>");
+        var id = Positional(2, "<id> | all");
+        if (id.Equals("all", StringComparison.OrdinalIgnoreCase))
+        {
+            var all = Proposals.List();
+            foreach (var p in all) { Proposals.Reject(p.Rule.Id); Console.WriteLine(T("ai-rejected", p.Rule.Id)); }
+            if (all.Count == 0) Console.WriteLine(T("ai-no-proposals"));
+            return ExitCodes.Ok;
+        }
         if (!Proposals.Reject(id)) throw new CliException(T("ai-not-found", id));
         Console.WriteLine(T("ai-rejected", id));
         return ExitCodes.Ok;

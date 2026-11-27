@@ -54,7 +54,12 @@ public sealed class RuleCatalog
         {
             if (string.IsNullOrWhiteSpace(r.File)) throw new FormatException($"{rule.Id}: redact.file fehlt.");
             _ = new Glob(r.File);
-            if (r.Json.Count + r.Ini.Count == 0) throw new FormatException($"{rule.Id}: redact für '{r.File}' nennt keine Schlüssel.");
+            if (r.Json.Count + r.Ini.Count + r.Xml.Count == 0) throw new FormatException($"{rule.Id}: redact für '{r.File}' nennt keine Schlüssel.");
+            foreach (var x in r.Xml)
+            {
+                try { System.Xml.XPath.XPathExpression.Compile(x); }
+                catch (System.Xml.XPath.XPathException ex) { throw new FormatException($"{rule.Id}: ungültiger XPath '{x}': {ex.Message}"); }
+            }
         }
     }
 }

@@ -395,6 +395,7 @@ public static class AgentTools
                             ["file"] = str("File glob relative to the files entry, e.g. settings.json."),
                             ["json"] = new JsonObject { ["type"] = "array", ["items"] = new JsonObject { ["type"] = "string" }, ["description"] = "Dot paths, e.g. Configuration.User.Token; '**.Name' removes the property at any depth (glob allowed, e.g. **.*Protected)." },
                             ["ini"] = new JsonObject { ["type"] = "array", ["items"] = new JsonObject { ["type"] = "string" }, ["description"] = "INI keys, optionally Section.Key, e.g. SMTPPassword." },
+                            ["xml"] = new JsonObject { ["type"] = "array", ["items"] = new JsonObject { ["type"] = "string" }, ["description"] = "XPath expressions for XML files; matching elements/attributes are removed, e.g. //setting[@name='RecentFindThats']." },
                         },
                         ["required"] = new JsonArray("file"),
                     },

@@ -84,7 +84,8 @@ nie im Profil. Die Regel nennt sie im Feld `redact`:
 ```
 
 `file` ist ein Glob relativ zum Dateieintrag; `ini` nennt Schlüssel (optional `Abschnitt.Schlüssel`),
-`json` Pfade mit Punkt (`**.Name` = in jeder Tiefe, Name als Glob). Kodierung und BOM bleiben
+`json` Pfade mit Punkt (`**.Name` = in jeder Tiefe, Name als Glob), `xml` XPath-Ausdrücke
+(z. B. `//setting[@name='RecentFindThats']`, `//proxy/@password`). Kodierung und BOM bleiben
 erhalten; Binärdateien werden nicht verändert. Die Zahl entfernter Einträge steht je Modul im
 Manifest (`redactedEntries`).
 
@@ -309,7 +310,7 @@ profilekit learn stop --id <modul-id> [--name <Programm>] [--winget <id>] [--out
 profilekit ai status | models | config | key set|remove
 profilekit ai discover --app <Programm> [--winget <id>] [--id <modul-id>] [--provider …] [--model …]
 profilekit ai discover (--from-oemproj <Datei> | --from-winget <Datei> | --installed) [--limit n] [--retry] [--dry-run]
-profilekit ai proposals [--show <id>] | accept <id> | reject <id>
+profilekit ai proposals [--show <id>] | accept <id>|all [--force] | reject <id>|all
 profilekit mcp | mcp install [--uninstall] | mcp config
 Global: --lang de|en, --rules <Ordner>, --verbose
 ```

@@ -40,8 +40,8 @@ internal static class HelpText
                 [--limit n] [--retry] [--dry-run]
                                           Stapelmodus: alle Programme ohne Regel nacheinander untersuchen
           ai proposals [--show <id>]      offene Vorschläge anzeigen
-          ai accept <id> [--force]        Vorschlag als Regel übernehmen
-          ai reject <id>                  Vorschlag verwerfen
+          ai accept <id>|all [--force]    Vorschlag(e) als Regel übernehmen
+          ai reject <id>|all              Vorschlag(e) verwerfen
           ai models --provider ollama|openrouter [--filter <text>] [--all]
                                           verfügbare Modelle (live)
           ai config [--provider …] [--ollama-url …] [--ollama-model …] [--openrouter-model …]
@@ -94,8 +94,8 @@ internal static class HelpText
                 [--limit n] [--retry] [--dry-run]
                                           batch mode: examine every program without a rule in turn
           ai proposals [--show <id>]      list open proposals
-          ai accept <id> [--force]        accept a proposal as rule
-          ai reject <id>                  discard a proposal
+          ai accept <id>|all [--force]    accept proposal(s) as rules
+          ai reject <id>|all              discard proposal(s)
           ai models --provider ollama|openrouter [--filter <text>] [--all]
                                           available models (live)
           ai config [--provider …] [--ollama-url …] [--ollama-model …] [--openrouter-model …]

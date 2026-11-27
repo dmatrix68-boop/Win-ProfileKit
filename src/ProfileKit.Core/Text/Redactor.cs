@@ -30,6 +30,7 @@ public static class Redactor
         {
             if (rule.Json.Count > 0) text = RedactJson(text, rule.Json, ref removed);
             if (rule.Ini.Count > 0) text = RedactIni(text, rule.Ini, ref removed);
+            if (rule.Xml.Count > 0) text = RedactXml(text, rule.Xml, ref removed);
         }
         if (removed == 0) return null;
 
@@ -70,6 +71,36 @@ public static class Redactor
         removed += count;
         var indented = text.Contains('\n');
         return root.ToJsonString(new JsonSerializerOptions { WriteIndented = indented, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+    }
+
+    /// <summary>Entfernt alle Elemente/Attribute, die einer der XPath-Ausdrücke trifft. Formatierung bleibt erhalten.</summary>
+    public static string RedactXml(string text, IEnumerable<string> xpaths, ref int removed)
+    {
+        System.Xml.Linq.XDocument doc;
+        try { doc = System.Xml.Linq.XDocument.Parse(text, System.Xml.Linq.LoadOptions.PreserveWhitespace); }
+        catch (System.Xml.XmlException) { return text; }
+
+        var count = 0;
+        foreach (var xpath in xpaths)
+        {
+            object result;
+            try { result = System.Xml.XPath.Extensions.XPathEvaluate(doc, xpath); }
+            catch (System.Xml.XPath.XPathException) { continue; }
+            if (result is not IEnumerable<object> nodes) continue;
+            foreach (var node in nodes.ToList())
+            {
+                switch (node)
+                {
+                    case System.Xml.Linq.XElement e when e.Parent is not null || e != doc.Root: e.Remove(); count++; break;
+                    case System.Xml.Linq.XAttribute a: a.Remove(); count++; break;
+                    case System.Xml.Linq.XText t: t.Value = string.Empty; count++; break;
+                }
+            }
+        }
+        if (count == 0) return text;
+        removed += count;
+        var body = doc.ToString(System.Xml.Linq.SaveOptions.DisableFormatting);
+        return doc.Declaration is null ? body : doc.Declaration + (text.Contains("\r\n") ? "\r\n" : "\n") + body;
     }
 
     public static string RedactIni(string text, IEnumerable<string> keys, ref int removed)

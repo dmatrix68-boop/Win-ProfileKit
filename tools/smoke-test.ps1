@@ -147,6 +147,7 @@ Invoke-Pk @('ai', 'proposals')
 Invoke-Pk @('ai', 'proposals', '--show', 'smoke.mcp')
 Invoke-Pk @('ai', 'accept', 'smoke.mcp')
 Assert-True (Test-Path (Join-Path $env:LOCALAPPDATA 'Win-ProfileKit\rules\smoke.mcp.json')) 'KI-Vorschlag als Regel übernommen'
+Invoke-Pk @('ai', 'accept', 'all')
 
 # --- KI-Status, Anmeldeinformationsverwaltung, MCP-Konfiguration ------------------------
 'sk-or-dummy-smoke' | & $Exe ai key set --stdin --lang de

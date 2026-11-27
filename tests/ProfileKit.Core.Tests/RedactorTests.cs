@@ -107,6 +107,30 @@ public class RedactorTests
     }
 
     [Fact]
+    public void Xml_elements_and_attributes_by_xpath()
+    {
+        var xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<configuration>\r\n  <userSettings>\r\n" +
+                  "    <setting name=\"DarkMode\" serializeAs=\"String\"><value>True</value></setting>\r\n" +
+                  "    <setting name=\"RecentFindThats\" serializeAs=\"Xml\"><value><ArrayOfString><string>ABCD-1234-LICENSE</string></ArrayOfString></value></setting>\r\n" +
+                  "  </userSettings>\r\n  <proxy password=\"geheim\" host=\"p\" />\r\n</configuration>";
+        var removed = 0;
+        var result = Redactor.RedactXml(xml, ["//setting[@name='RecentFindThats']", "//proxy/@password"], ref removed);
+        Assert.Equal(2, removed);
+        Assert.DoesNotContain("LICENSE", result);
+        Assert.DoesNotContain("geheim", result);
+        Assert.Contains("<value>True</value>", result);
+        Assert.Contains("host=\"p\"", result);
+        Assert.StartsWith("<?xml version=\"1.0\" encoding=\"utf-8\"?>", result);
+
+        removed = 0;
+        Assert.Equal("kein xml", Redactor.RedactXml("kein xml", ["//x"], ref removed));
+        Assert.Throws<FormatException>(() => RuleCatalog.Validate(new ModuleRule
+        {
+            Id = "x", DisplayName = "X", Redact = [new RedactRule { File = "a.config", Xml = ["//[kaputt"] }],
+        }));
+    }
+
+    [Fact]
     public void Redact_rule_without_keys_is_invalid()
     {
         var rule = new ModuleRule { Id = "x", DisplayName = "X", Redact = [new RedactRule { File = "a.ini" }] };
