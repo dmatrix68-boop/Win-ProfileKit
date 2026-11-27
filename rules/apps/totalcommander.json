@@ -1,0 +1,14 @@
+{
+  "id": "totalcommander",
+  "displayName": "Total Commander",
+  "wingetId": "Ghisler.TotalCommander",
+  "files": [
+    { "path": "%APPDATA%\\GHISLER" },
+    { "path": "%PROGRAMFILES%\\totalcmd\\wincmd.key", "kind": "Keyfile" }
+  ],
+  "registry": [ { "key": "HKCU\\Software\\Ghisler\\Total Commander" } ],
+  "excludes": [ "wcx_ftp.ini", "*.log", "*.bak", "treeinfo*.wc" ],
+  "processes": [ "TOTALCMD64", "TOTALCMD" ],
+  "origin": "Catalog",
+  "notes": "wincmd.ini, usercmd.ini, Buttonbars u. a. in %APPDATA%\\GHISLER; der Registry-Schlüssel enthält u. a. IniFileName. Lizenz wincmd.key liegt im Programmordner (Standard C:\\Program Files\\totalcmd). wcx_ftp.ini enthält FTP-Zugangsdaten und wird ausgeschlossen."
+}

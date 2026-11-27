@@ -1,0 +1,10 @@
+{
+  "id": "xnviewmp",
+  "displayName": "XnView MP",
+  "wingetId": "XnSoft.XnViewMP",
+  "files": [ { "path": "%APPDATA%\\XnViewMP" } ],
+  "excludes": [ "Thumb.db", "*.db-journal", "*.log", "cache\\**" ],
+  "processes": [ "xnviewmp" ],
+  "origin": "Catalog",
+  "notes": "xnview.ini, Tastenbelegung (default.keys), Layouts und Filter in %APPDATA%\\XnViewMP. Die Miniaturbild-Datenbank Thumb.db wird ausgeschlossen und neu aufgebaut."
+}

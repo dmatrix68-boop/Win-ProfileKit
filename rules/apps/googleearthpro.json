@@ -1,0 +1,13 @@
+{
+  "id": "googleearthpro",
+  "displayName": "Google Earth Pro",
+  "wingetId": "Google.EarthPro",
+  "files": [
+    { "path": "%LOCALAPPDATALOW%\\Google\\GoogleEarth\\myplaces.kml" },
+    { "path": "%LOCALAPPDATALOW%\\Google\\GoogleEarth\\myplaces.backup.kml" }
+  ],
+  "registry": [ { "key": "HKCU\\Software\\Google\\Google Earth Pro" } ],
+  "processes": [ "googleearth" ],
+  "origin": "Catalog",
+  "notes": "Optionen unter HKCU\\Software\\Google\\Google Earth Pro, 'Meine Orte' in %USERPROFILE%\\AppData\\LocalLow\\Google\\GoogleEarth\\myplaces.kml. Der Kachel-Cache (dbCache.dat, unified_cache_leveldb) bleibt außen vor."
+}

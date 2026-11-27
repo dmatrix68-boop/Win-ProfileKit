@@ -1,0 +1,10 @@
+{
+  "id": "autodarkmode",
+  "displayName": "Auto Dark Mode",
+  "wingetId": "ArminOsaj.AutoDarkMode",
+  "files": [ { "path": "%APPDATA%\\AutoDarkMode" } ],
+  "excludes": [ "*.log", "*.log.*", "Update\\**" ],
+  "processes": [ "AutoDarkModeApp", "AutoDarkModeSvc" ],
+  "origin": "Catalog",
+  "notes": "Konfiguration als YAML in %APPDATA%\\AutoDarkMode (config.yaml, scripts.yaml, location_data.yaml). Steuert selbst Hell/Dunkel – zusammen mit windows.theme gewinnt nach der Anmeldung Auto Dark Mode."
+}

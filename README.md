@@ -14,8 +14,10 @@ Testbenutzer auf Installations-VMs und für den OEM-Skriptlauf
 ## Funktionen (Phase 1)
 
 * **Regelkatalog** (`rules/`): je Programm, welche Dateien und Registry-Schlüssel dazugehören –
-  aktuell Notepad++, 7-Zip, WinRAR (inkl. Keyfile) und Windows-Module für Maus, Design,
-  Zwischenablageverlauf, Explorer und Taskleiste.
+  aktuell 16 Programme (u. a. PowerToys, Windows Terminal, Total Commander und WinRAR inkl.
+  Keyfile, Everything, XnView MP, VLC, HandBrake, Ditto, RustDesk, UniGetUI) und Windows-Module
+  für Maus, Design, Zwischenablageverlauf, Explorer und Taskleiste. Noch offene Programme:
+  [rules/KANDIDATEN.md](rules/KANDIDATEN.md).
 * **Erfassen** vom aktuellen oder einem anderen Benutzer; Pfade werden neutral gespeichert
   (`%APPDATA%\…`), Caches und Logs ausgeschlossen.
 * **Anwenden** auf den aktuellen Benutzer, einen anderen Benutzer (auch abgemeldet – der Hive

@@ -32,6 +32,25 @@ public class CatalogTests
         Assert.True(winrar!.ContainsKeyfiles);
     }
 
+    [Theory]
+    [InlineData("totalcommander", @"wcx_ftp.ini")]   // FTP-Zugangsdaten
+    [InlineData("powertoys", @"PowerToys Run\Logs\0.1\log.txt")]
+    [InlineData("everything", "Everything-1.5a.db")]
+    [InlineData("xnviewmp", "Thumb.db")]
+    public void Sensitive_or_cache_files_are_excluded(string id, string relative)
+    {
+        var rule = RuleCatalog.Load(RulesDir).Find(id)!;
+        Assert.True(new Paths.ExcludeSet(rule.Excludes).IsExcluded(relative), $"{id}: {relative} sollte ausgeschlossen sein");
+    }
+
+    [Fact]
+    public void RustDesk_never_captures_id_and_password_file()
+    {
+        var rule = RuleCatalog.Load(RulesDir).Find("rustdesk")!;
+        Assert.DoesNotContain(rule.Files, f => f.Path.EndsWith(@"\RustDesk.toml", StringComparison.OrdinalIgnoreCase)
+                                             || f.Path.EndsWith(@"\config", StringComparison.OrdinalIgnoreCase));
+    }
+
     [Fact]
     public void Later_directories_override_earlier()
     {

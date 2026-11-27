@@ -1,0 +1,10 @@
+{
+  "id": "unigetui",
+  "displayName": "UniGetUI",
+  "wingetId": "Devolutions.UniGetUI",
+  "files": [ { "path": "%LOCALAPPDATA%\\UniGetUI\\Configuration" } ],
+  "excludes": [ "*.log" ],
+  "processes": [ "UniGetUI" ],
+  "origin": "Catalog",
+  "notes": "Einstellungen als einzelne Dateien in %LOCALAPPDATA%\\UniGetUI\\Configuration (ältere Versionen: %USERPROFILE%\\.wingetui). Ignorierte Updates und Paketquellen sind enthalten, der Symbol-Cache nicht."
+}

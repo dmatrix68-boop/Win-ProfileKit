@@ -1,0 +1,10 @@
+{
+  "id": "handbrake",
+  "displayName": "HandBrake",
+  "wingetId": "HandBrake.HandBrake",
+  "files": [ { "path": "%APPDATA%\\HandBrake" } ],
+  "excludes": [ "logs\\**", "*.log" ],
+  "processes": [ "HandBrake" ],
+  "origin": "Catalog",
+  "notes": "settings.json (Programmoptionen) und presets.json (eigene Voreinstellungen) in %APPDATA%\\HandBrake; Protokolle im Unterordner logs werden ausgeschlossen."
+}
