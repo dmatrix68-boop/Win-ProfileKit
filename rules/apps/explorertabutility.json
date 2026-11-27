@@ -1,0 +1,11 @@
+{
+  "id": "explorertabutility",
+  "displayName": "ExplorerTabUtility",
+  "wingetId": "w4po.ExplorerTabUtility",
+  "files": [ { "path": "%APPDATA%\\ExplorerTabUtility" } ],
+  "excludes": [ "*.log", "logs\\**" ],
+  "redact": [ { "file": "settings.json", "json": [ "ClosedWindows" ] } ],
+  "processes": [ "ExplorerTabUtility" ],
+  "origin": "Catalog",
+  "notes": "Per 'profilekit ai discover' ermittelt und auf einem echten System geprüft. Alle Einstellungen in %APPDATA%\\ExplorerTabUtility\\settings.json: Maus-/Tastatur-/Fenster-Hooks, ReuseTabs, AutoUpdate, Tastenkürzel-Profile (HotKeyProfiles), Fenstergröße, Wiederherstellen-Optionen. ClosedWindows (zuletzt geschlossene Ordnerpfade) wird beim Erfassen entfernt. Programm liegt in %LOCALAPPDATA%\\Programs\\ExplorerTabUtility (nur Programmdateien), keine Registry-Einstellungen. Der Autostart-Eintrag in HKCU\\...\\Run enthält einen benutzerspezifischen Pfad und wird nicht übernommen – Autostart beim Zielbenutzer in der App aktivieren."
+}

@@ -1,0 +1,9 @@
+{
+  "id": "ausweisapp",
+  "displayName": "AusweisApp",
+  "wingetId": "Governikus.AusweisApp",
+  "registry": [ { "key": "HKCU\\Software\\Governikus GmbH & Co. KG\\AusweisApp2", "recurse": false } ],
+  "processes": [ "AusweisApp", "AusweisApp2" ],
+  "origin": "Catalog",
+  "notes": "Per 'profilekit ai discover' ermittelt und auf einem echten System geprüft (AusweisApp 2.6.3, Qt QSettings). Einstellungen als Werte direkt in HKCU\\Software\\Governikus GmbH & Co. KG\\AusweisApp2 (darkMode, enableTrayIcon, remindToClose, showOnboarding, transportPinReminder, uiStartupModule, persistentSettingsVersion). Unterschlüssel bewusst NICHT: remotereader enthält privaten RSA-Schlüssel, Zertifikat und gekoppelte Smartphones (Kartenleser-Smartphone beim Zielbenutzer neu koppeln), preverification\\linkcertificates ist ein Zertifikats-Cache. %LOCALAPPDATA%\\Governikus … enthält nur Cache. Keine Lizenzdatei."
+}

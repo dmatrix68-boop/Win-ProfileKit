@@ -1,0 +1,22 @@
+{
+  "id": "smoke.test",
+  "displayName": "Smoke test",
+  "wingetId": "ProfileKit.SmokeTest",
+  "files": [
+    {
+      "path": "%APPDATA%\\ProfileKitSmoke"
+    }
+  ],
+  "registry": [
+    {
+      "key": "HKCU\\Software\\ProfileKitSmoke"
+    },
+    {
+      "key": "HKLM\\SOFTWARE\\ProfileKitSmokeHKLM"
+    }
+  ],
+  "excludes": [
+    "*.log"
+  ],
+  "notes": "Nur f\u00fcr tools/smoke-test.ps1."
+}

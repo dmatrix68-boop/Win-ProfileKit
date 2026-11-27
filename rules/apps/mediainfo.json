@@ -1,0 +1,11 @@
+{
+  "id": "mediainfo",
+  "displayName": "MediaInfo",
+  "wingetId": "MediaArea.MediaInfo.GUI",
+  "files": [ { "path": "%APPDATA%\\MediaInfo\\Plugin" } ],
+  "registry": [ { "key": "HKCU\\Software\\MediaArea\\MediaInfo" } ],
+  "excludes": [ "Language\\**", "Sponsor\\**", "*.log" ],
+  "processes": [ "MediaInfo" ],
+  "origin": "Catalog",
+  "notes": "Per 'profilekit ai discover' ermittelt und auf einem echten System geprüft (MediaInfo 26.10). Einstellungen in %APPDATA%\\MediaInfo\\Plugin\\MediaInfo.cfg (Ausgabe, Sprache, Vorlagen, Explorer-Integration, Symbolleiste, Menü, Update-Prüfung, Theme) und eigene Ausgabevorlagen in Custom, Sheet, Tree. HKCU\\Software\\MediaArea\\MediaInfo enthält die Kontextmenü-Optionen (und einen Installationszähler). Ausgeschlossen: Language (laut Prüfung vom Installer kopierte Sprachdateien – auf dem Ziel durch die Installation vorhanden), Sponsor (Werbebanner-Cache), WebView2-Profil. Das Kontextmenü-Paket (Packages\\MediaInfo_*) registriert der Installer. Keine Zugangsdaten oder Lizenzdateien."
+}

@@ -1,0 +1,29 @@
+{
+  "id": "fineprint",
+  "displayName": "FinePrint",
+  "wingetId": "FineprintSoftware.FinePrint",
+  "files": [
+    { "path": "%USERPROFILE%\\OneDrive\\Documents\\FinePrint-Dateien\\Forms" },
+    { "path": "%USERPROFILE%\\Documents\\FinePrint-Dateien\\Forms" }
+  ],
+  "registry": [
+    {
+      "key": "HKCU\\Software\\FinePrint Software\\FinePrint12",
+      "values": [
+        "AppFont", "AppFontSize", "BitmapDepth", "BitmapResolution", "CheckServer", "Dither",
+        "EnablePageButtons", "EnableSheetButtons", "EnableThumbButtons", "JpegQuality", "LineBreaks",
+        "OpenFileType", "PageBreaks", "PublishSettings", "QuickBypass", "RLE", "SaveFileType", "SaveLayout",
+        "SinglePageFiles", "TiffCompressionColor", "TiffCompressionMono", "ToolTips", "ViewOutputFile"
+      ],
+      "recurse": false
+    },
+    { "key": "HKCU\\Software\\FinePrint Software\\FinePrint12\\CustomPapers" },
+    { "key": "HKCU\\Software\\FinePrint Software\\FinePrint12\\CustomSettings" },
+    { "key": "HKCU\\Software\\FinePrint Software\\FinePrint12\\FinePrinters" },
+    { "key": "HKCU\\Software\\FinePrint Software\\FinePrint12\\General" },
+    { "key": "HKCU\\Software\\FinePrint Software\\FinePrint12\\Shortcuts" }
+  ],
+  "processes": [ "fpdisp12" ],
+  "origin": "Catalog",
+  "notes": "Per 'profilekit ai discover' ermittelt und auf einem echten System geprüft (FinePrint 12). Einstellungen in HKCU\\Software\\FinePrint Software\\FinePrint12: Hauptwerte (Schrift, Auflösung, Dateiformate, Schaltflächen) einzeln, dazu die Unterschlüssel FinePrinters (Layout, Ränder, Zieldrucker), CustomPapers, CustomSettings, General und Shortcuts. Eigene Notizvorlagen (*.FpNote) in Dokumente\\FinePrint-Dateien\\Forms – mit oder ohne OneDrive. Nicht übernommen: Lizenz RegName/RegNum (wird neu eingegeben), Zähler, Install-/Versionsmarker, CurDir, FontCache, IniHash, Kopiermarker je Rechner, fp12.ini/fp12.sta (Registry-Sicherung mit Computername und Seriennummer), Ordner Sicherungskopie (gespeicherte Druckjobs). QuickBypass ist die Umgehen-Option des Druckers, keine Anmeldeinformation. Eine Lizenzdatei gibt es nicht."
+}

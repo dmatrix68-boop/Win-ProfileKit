@@ -1,0 +1,10 @@
+{
+  "id": "everything",
+  "displayName": "Everything 1.5 (Alpha)",
+  "wingetId": "voidtools.Everything.Alpha",
+  "files": [ { "path": "%APPDATA%\\Everything" } ],
+  "excludes": [ "*.db", "*.tmp", "*.log" ],
+  "processes": [ "Everything64", "Everything" ],
+  "origin": "Catalog",
+  "notes": "Everything 1.5a speichert Einstellungen in %APPDATA%\\Everything\\Everything-1.5a.ini (dazu Filter, Lesezeichen, Verlauf als CSV). Der Index (*.db) wird ausgeschlossen und auf dem Ziel neu erstellt. Gilt für die installierte, nicht die portable Variante."
+}

@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- WinUI 3, unpackaged und self-contained: läuft ohne Installation und ohne Windows-App-Runtime.
+       Baut nur unter Windows (XAML-Compiler); deshalb nicht in ProfileKit.sln, sondern eigener CI-Schritt. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.22000.0</TargetPlatformMinVersion>
+    <RootNamespace>ProfileKit.App</RootNamespace>
+    <AssemblyName>profilekit-gui</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x64</Platforms>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <SelfContained>true</SelfContained>
+    <LangVersion>latest</LangVersion>
+    <!-- XAML-generierter Code erzeugt teils Warnungen, die wir nicht beeinflussen -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260921001" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ProfileKit.Core\ProfileKit.Core.csproj" />
+    <ProjectReference Include="..\ProfileKit.Windows\ProfileKit.Windows.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\rules\**\*.json;..\..\rules\*.list" LinkBase="rules" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

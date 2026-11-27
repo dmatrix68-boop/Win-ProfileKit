@@ -1,0 +1,14 @@
+{
+  "id": "windows.taskbar",
+  "displayName": "Windows: Taskleiste / Taskbar",
+  "registry": [
+    {
+      "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+      "values": [ "TaskbarAl", "ShowTaskViewButton", "TaskbarDa", "TaskbarSd" ]
+    },
+    { "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Search", "values": [ "SearchboxTaskbarMode" ] }
+  ],
+  "postApply": [ "taskbar" ],
+  "origin": "Catalog",
+  "notes": "TaskbarAl 0 = links, 1 = Mitte; SearchboxTaskbarMode 0–3. TaskbarDa (Widgets) ist bei aktuellen Builds durch den UCPD-Treiber gegen Schreiben geschützt – dann erscheint eine Warnung. Taskleisten-Pins sind nicht enthalten."
+}

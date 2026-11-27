@@ -1,0 +1,9 @@
+{
+  "id": "ditto",
+  "displayName": "Ditto",
+  "wingetId": "Ditto.Ditto",
+  "registry": [ { "key": "HKCU\\Software\\Ditto" } ],
+  "processes": [ "Ditto" ],
+  "origin": "Catalog",
+  "notes": "Einstellungen und Tastenkürzel unter HKCU\\Software\\Ditto. Die Datenbank %APPDATA%\\Ditto\\Ditto.db enthält den Zwischenablageverlauf (private Inhalte) und wird bewusst nicht erfasst."
+}

@@ -1,0 +1,18 @@
+{
+  "id": "aida64extreme",
+  "displayName": "AIDA64 Extreme",
+  "wingetId": "FinalWire.AIDA64.Extreme",
+  "files": [
+    { "path": "%PROGRAMFILES%\\FinalWire\\AIDA64 Extreme\\aida64.ini" },
+    { "path": "%PROGRAMFILES%\\FinalWire\\AIDA64 Extreme\\aida64.mondiag.ini" },
+    { "path": "%PROGRAMFILES%\\FinalWire\\AIDA64 Extreme\\aida64.rpf" },
+    { "path": "%PROGRAMFILES%\\FinalWire\\AIDA64 Extreme\\SensorPanel" },
+    { "path": "%PROGRAMFILES%\\FinalWire\\AIDA64 Extreme\\pkey.txt", "kind": "Keyfile" }
+  ],
+  "registry": [ { "key": "HKCU\\Software\\FinalWire\\AIDA64" } ],
+  "excludes": [ "*.log", "*.tmp" ],
+  "redact": [ { "file": "aida64.ini", "ini": [ "SMTPUser", "SMTPPassword" ] } ],
+  "processes": [ "aida64" ],
+  "origin": "Catalog",
+  "notes": "Per 'profilekit ai discover' ermittelt und auf einem echten System geprüft. AIDA64 speichert seine Einstellungen maschinenweit im Installationsordner: aida64.ini (UTF-16, [Generic] mit Sprache, Theme, Sensor-, Report-, OSD-/LCD-/SensorPanel-Optionen), aida64.mondiag.ini (Monitor-Diagnose), aida64.rpf (Report-Profile), Ordner SensorPanel (eigene Bilder). Je Benutzer: HKCU\\Software\\FinalWire\\AIDA64 (Fenster- und Spaltenlayout). Lizenz pkey.txt wird als Keyfile mitkopiert. SMTPUser/SMTPPassword werden beim Erfassen aus aida64.ini entfernt. ReportFileFolder enthält einen absoluten Benutzerpfad und wird beim Anwenden auf den Zielbenutzer umgeschrieben. Schreiben in den Programmordner braucht Adminrechte."
+}

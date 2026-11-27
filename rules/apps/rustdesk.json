@@ -1,0 +1,9 @@
+{
+  "id": "rustdesk",
+  "displayName": "RustDesk",
+  "wingetId": "RustDesk.RustDesk",
+  "files": [ { "path": "%APPDATA%\\RustDesk\\config\\RustDesk2.toml" } ],
+  "processes": [ "rustdesk" ],
+  "origin": "Catalog",
+  "notes": "Optionen (eigener ID-/Relay-Server, Schlüssel, Darstellung) in RustDesk2.toml. RustDesk.toml enthält ID und Kennwort des Rechners und wird bewusst NICHT übertragen. Im OEM-Projekt per Chocolatey (rustdesk.install) installiert; winget-ID RustDesk.RustDesk. Läuft RustDesk als Dienst, nutzt dieser zusätzlich das Profil von LocalService."
+}

@@ -1,0 +1,10 @@
+{
+  "id": "powertoys",
+  "displayName": "PowerToys",
+  "wingetId": "Microsoft.PowerToys",
+  "files": [ { "path": "%LOCALAPPDATA%\\Microsoft\\PowerToys" } ],
+  "excludes": [ "**\\Logs\\**", "Updates\\**", "*.log", "*.etl", "**\\cache\\**", "**\\WebView2\\**" ],
+  "processes": [ "PowerToys", "PowerToys.Settings" ],
+  "origin": "Catalog",
+  "notes": "settings.json je Modul in %LOCALAPPDATA%\\Microsoft\\PowerToys\\<Modul> (FancyZones-Layouts, Keyboard Manager, PowerToys Run …) plus globale settings.json. Entspricht dem, was die eingebaute Sicherung von PowerToys sichert. PowerToys vor dem Anwenden beenden."
+}

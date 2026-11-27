@@ -1,0 +1,9 @@
+{
+  "id": "anyburn",
+  "displayName": "AnyBurn",
+  "wingetId": "PowerSoftware.AnyBurn",
+  "registry": [ { "key": "HKCU\\Software\\AnyBurn" } ],
+  "processes": [ "AnyBurn", "abcmd" ],
+  "origin": "Catalog",
+  "notes": "Per 'profilekit ai discover' ermittelt und auf einem echten System geprüft. Alle Benutzereinstellungen in HKCU\\Software\\AnyBurn: Sprache, Aktion bei Drag & Drop, Medientyp und -kapazität, Löschzeit, Fensterposition, Update-Prüfung, ViewSettings\\AudioConverter. Install_Dir_x64 im selben Schlüssel zeigt auf den Standardpfad C:\\Program Files\\AnyBurn. %APPDATA%\\anyburn enthält nur die Update-Prüfung (Upgrade\\version.ini) und wird nicht übernommen. Keine INI- oder Lizenzdatei (Freeware)."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "deepl",
+  "displayName": "DeepL",
+  "wingetId": "DeepL.DeepL",
+  "files": [ { "path": "%APPDATA%\\DeepL_SE\\settings.json" } ],
+  "redact": [
+    { "file": "settings.json", "json": [ "Configuration.User.UserData", "**.*Protected" ] }
+  ],
+  "processes": [ "DeepL" ],
+  "origin": "Catalog",
+  "notes": "Per 'profilekit ai discover' ermittelt und auf einem echten System geprüft (DeepL für Windows 26.11.1). Alle Benutzereinstellungen in %APPDATA%\\DeepL_SE\\settings.json: Tastenkürzel, ProcessBlacklist, DocTransSaveFolder, Proxy, Design, Zielsprachen, Fensterposition. Die DPAPI-verschlüsselten Anmeldedaten (Configuration.User.UserData, TokenProtected, LastAccessTokenProtected, IdentityTokenProtected) werden beim Erfassen entfernt – beim Zielbenutzer ist eine neue Anmeldung nötig. Nicht übernommen: Übersetzungs- und Dokumentverlauf (history*.db, translations.db, documents.db), Telemetrie (statsig, featureGates*, abExperimentation*), logs, Cache, HKCU\\Software\\DeepL (nur Installations-ID). Absolute Benutzerpfade (DocTransSaveFolder, ProcessBlacklist) werden beim Anwenden umgeschrieben."
+}

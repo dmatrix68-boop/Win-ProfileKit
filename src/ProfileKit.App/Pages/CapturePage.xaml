@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="ProfileKit.App.Pages.CapturePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:l="using:ProfileKit.App"
+    xmlns:s="using:ProfileKit.App.Services">
+    <Grid RowSpacing="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock Text="{l:Loc Key=ui-capture-title}" Style="{StaticResource PageTitle}" />
+            <TextBlock Text="{l:Loc Key=ui-capture-intro}" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+            <ComboBox x:Name="SourceBox" Header="{l:Loc Key=ui-capture-source}" MinWidth="240" />
+            <Button Content="{l:Loc Key=ui-select-all}" Click="SelectAll_Click" VerticalAlignment="Bottom" />
+            <Button Content="{l:Loc Key=ui-select-none}" Click="SelectNone_Click" VerticalAlignment="Bottom" />
+            <Button Content="{l:Loc Key=ui-select-windows}" Click="SelectWindows_Click" VerticalAlignment="Bottom" />
+            <Button x:Name="InstalledButton" Content="{l:Loc Key=ui-select-installed}" Click="SelectInstalled_Click" VerticalAlignment="Bottom" />
+            <ProgressRing x:Name="InventoryRing" IsActive="False" Width="20" Height="20" VerticalAlignment="Bottom" />
+        </StackPanel>
+
+        <Expander Grid.Row="2" Header="{l:Loc Key=ui-vhdx-header}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+            <StackPanel Spacing="8">
+                <TextBlock Text="{l:Loc Key=ui-vhdx-text}" TextWrapping="Wrap" />
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="200" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="VhdxBox" Header="{l:Loc Key=ui-vhdx-file}" PlaceholderText="D:\Hyper-V\Test-VM\Virtual Hard Disks\Test-VM.vhdx" />
+                    <Button Grid.Column="1" Content="{l:Loc Key=ui-browse}" Click="BrowseVhdx_Click" VerticalAlignment="Bottom" />
+                    <TextBox Grid.Column="2" x:Name="VhdxUserBox" Header="{l:Loc Key=ui-vhdx-user}" />
+                    <Button Grid.Column="3" Content="{l:Loc Key=ui-vhdx-users}" Click="VhdxUsers_Click" VerticalAlignment="Bottom" />
+                </Grid>
+            </StackPanel>
+        </Expander>
+
+        <ListView x:Name="ModuleList" Grid.Row="3" SelectionMode="None" BorderThickness="1"
+                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="4">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="s:SelectableItem">
+                    <CheckBox IsChecked="{x:Bind IsSelected, Mode=TwoWay}">
+                        <StackPanel>
+                            <TextBlock Text="{x:Bind Title}" />
+                            <TextBlock Text="{x:Bind Subtitle}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                    </CheckBox>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <Grid Grid.Row="4" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="FolderBox" Header="{l:Loc Key=ui-capture-folder}" />
+            <Button Grid.Column="1" Content="{l:Loc Key=ui-browse}" Click="Browse_Click" VerticalAlignment="Bottom" />
+            <TextBox Grid.Column="2" x:Name="NameBox" Header="{l:Loc Key=ui-capture-name}" />
+            <CheckBox Grid.Column="3" x:Name="ZipBox" Content="{l:Loc Key=ui-capture-zip}" VerticalAlignment="Bottom" />
+            <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
+                <Button Content="{l:Loc Key=ui-capture-start}" Click="Start_Click" Style="{StaticResource AccentButtonStyle}" />
+                <Button Content="{l:Loc Key=ui-capture-collect}" Click="Collect_Click" ToolTipService.ToolTip="{l:Loc Key=ui-capture-collect-hint}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Page>

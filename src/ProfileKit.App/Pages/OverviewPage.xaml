@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="ProfileKit.App.Pages.OverviewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:l="using:ProfileKit.App">
+    <ScrollViewer>
+        <StackPanel Spacing="8" MaxWidth="900" HorizontalAlignment="Left">
+            <TextBlock Text="{l:Loc Key=ui-overview-title}" Style="{StaticResource PageTitle}" />
+            <TextBlock Text="{l:Loc Key=ui-overview-intro}" TextWrapping="Wrap" />
+
+            <TextBlock Text="{l:Loc Key=ui-overview-system}" Style="{StaticResource SectionTitle}" />
+            <TextBlock x:Name="UserText" />
+            <TextBlock x:Name="AdminText" />
+            <TextBlock x:Name="CatalogText" />
+            <TextBlock x:Name="ProposalText" />
+            <TextBlock x:Name="AiText" TextWrapping="Wrap" />
+
+            <TextBlock Text="{l:Loc Key=ui-overview-steps}" Style="{StaticResource SectionTitle}" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="{l:Loc Key=ui-nav-capture}" Click="GoCapture_Click" Style="{StaticResource AccentButtonStyle}" />
+                <Button Content="{l:Loc Key=ui-nav-apply}" Click="GoApply_Click" />
+                <Button Content="{l:Loc Key=ui-nav-learn}" Click="GoLearn_Click" />
+                <Button Content="{l:Loc Key=ui-nav-ai}" Click="GoAi_Click" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

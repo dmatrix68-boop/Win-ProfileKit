@@ -1,0 +1,8 @@
+{
+  "id": "usbdlm",
+  "displayName": "USB Drive Letter Manager",
+  "wingetId": "UweSieber.USBDLM",
+  "files": [ { "path": "%PROGRAMFILES%\\USBDLM\\USBDLM.INI" } ],
+  "origin": "Catalog",
+  "notes": "USBDLM ist ein Dienst; die gesamte Konfiguration steht in USBDLM.INI im Programmordner (maschinenweit, gilt für alle Benutzer, Schreiben braucht Adminrechte). Falls die Änderung nicht sofort greift: Dienst USBDLM neu starten."
+}

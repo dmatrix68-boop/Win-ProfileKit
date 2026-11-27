@@ -1,0 +1,22 @@
+{
+  "id": "linkshellextension",
+  "displayName": "Link Shell Extension",
+  "wingetId": "HermannSchinagl.LinkShellExtension",
+  "registry": [
+    { "key": "HKCU\\Software\\LinkShellExtension" },
+    {
+      "key": "HKLM\\SOFTWARE\\LinkShellExtension",
+      "values": [ "gFlags", "HardlinkOverlayPrio", "JunctionOverlayPrio", "SymboliclinkOverlayPrio", "ThirdPartyFileSystems" ],
+      "recurse": false
+    },
+    {
+      "key": "HKLM\\SOFTWARE\\WOW6432Node\\LinkShellExtension",
+      "values": [ "gFlags", "HardlinkOverlayPrio", "JunctionOverlayPrio", "SymboliclinkOverlayPrio", "ThirdPartyFileSystems" ],
+      "recurse": false
+    }
+  ],
+  "postApply": [ "explorer" ],
+  "processes": [ "LSEConfig" ],
+  "origin": "Catalog",
+  "notes": "Per 'profilekit ai discover' ermittelt und auf einem echten System geprüft. Keine Dateien im Profil. Je Benutzer: HKCU\\Software\\LinkShellExtension (gFlags = Options-Bitmaske, Language, InstalledVersion). Maschinenweit (über LSEConfig, Adminrechte): gFlags, Overlay-Prioritäten und ThirdPartyFileSystems in HKLM\\SOFTWARE\\LinkShellExtension und WOW6432Node – nur einzeln genannte Werte; Install_Dir und Icon-Pfade bleiben außen vor. Keine Lizenzdatei (license.txt ist nur der Lizenztext). Änderungen greifen nach einem Neustart des Explorers bzw. erneuter Anmeldung."
+}

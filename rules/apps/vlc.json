@@ -1,0 +1,10 @@
+{
+  "id": "vlc",
+  "displayName": "VLC media player",
+  "wingetId": "VideoLAN.VLC",
+  "files": [ { "path": "%APPDATA%\\vlc" } ],
+  "excludes": [ "art\\**", "crashdump", "*.log", "ml.xspf" ],
+  "processes": [ "vlc" ],
+  "origin": "Catalog",
+  "notes": "vlcrc (alle Optionen) und vlc-qt-interface.ini (Oberfläche, zuletzt geöffnete Dateien) in %APPDATA%\\vlc. Albumcover-Cache (art) und Medienbibliothek (ml.xspf) werden ausgeschlossen."
+}

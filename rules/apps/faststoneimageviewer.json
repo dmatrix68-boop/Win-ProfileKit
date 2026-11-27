@@ -1,0 +1,10 @@
+{
+  "id": "faststoneimageviewer",
+  "displayName": "FastStone Image Viewer",
+  "wingetId": "FastStone.Viewer",
+  "files": [ { "path": "%LOCALAPPDATA%\\FastStone\\FSIV" } ],
+  "excludes": [ "FSIV.db", "HisFolderList.db", "PlayerList.db", "Email\\**", "*.log", "*.tmp" ],
+  "processes": [ "FSViewer" ],
+  "origin": "Catalog",
+  "notes": "Per 'profilekit ai discover' ermittelt und auf einem echten System geprüft (FSIV 8.5). Einstellungen in %LOCALAPPDATA%\\FastStone\\FSIV\\FSSettings.db (binär, ca. 8 KB). Ausgeschlossen: FSIV.db (Miniaturbild-Cache, mehrere 100 MB), HisFolderList.db (Ordnerverlauf mit privaten Pfaden), PlayerList.db (Wiedergabeverlauf), Email (temporär). Keine Einstellungen in HKCU; HKLM\\SOFTWARE\\WOW6432Node\\FastStone Image Viewer enthält nur Dateizuordnungen des Installers. Da FSSettings.db binär ist, werden darin enthaltene Pfade NICHT auf den Zielbenutzer umgeschrieben."
+}

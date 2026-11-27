@@ -1,0 +1,12 @@
+{
+  "id": "notepadplusplus",
+  "displayName": "Notepad++",
+  "wingetId": "Notepad++.Notepad++",
+  "files": [
+    { "path": "%APPDATA%\\Notepad++" }
+  ],
+  "excludes": [ "backup\\**", "session.xml", "*.log", "*.bak" ],
+  "processes": [ "notepad++" ],
+  "origin": "Catalog",
+  "notes": "Standardinstallation speichert alles unter %APPDATA%\\Notepad++ (config.xml, shortcuts.xml, stylers.xml, langs.xml, plugins\\Config). Liegt doLocalConf.xml im Programmordner, nutzt Notepad++ stattdessen den Programmordner – das ist hier nicht abgedeckt."
+}

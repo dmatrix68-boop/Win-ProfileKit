@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="ProfileKit.App.Pages.ApplyPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:l="using:ProfileKit.App"
+    xmlns:s="using:ProfileKit.App.Services">
+    <Grid ColumnSpacing="24" RowSpacing="8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="340" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.ColumnSpan="2" Spacing="4">
+            <TextBlock Text="{l:Loc Key=ui-apply-title}" Style="{StaticResource PageTitle}" />
+            <TextBlock Text="{l:Loc Key=ui-apply-intro}" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="ProfileBox" Header="{l:Loc Key=ui-apply-profile}" />
+            <Button Grid.Column="1" Content="{l:Loc Key=ui-browse-folder}" Click="BrowseFolder_Click" VerticalAlignment="Bottom" />
+            <Button Grid.Column="2" Content="{l:Loc Key=ui-browse-file}" Click="BrowseFile_Click" VerticalAlignment="Bottom" />
+            <Button Grid.Column="3" Content="{l:Loc Key=ui-apply-load}" Click="Load_Click" VerticalAlignment="Bottom" />
+        </Grid>
+
+        <Grid Grid.Row="2" RowSpacing="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBlock x:Name="ProfileInfo" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            <ListView x:Name="ModuleList" Grid.Row="1" SelectionMode="None" BorderThickness="1"
+                      BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="4">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="s:SelectableItem">
+                        <CheckBox IsChecked="{x:Bind IsSelected, Mode=TwoWay}">
+                            <StackPanel>
+                                <TextBlock Text="{x:Bind Title}" />
+                                <TextBlock Text="{x:Bind Subtitle}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </CheckBox>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+
+        <ScrollViewer Grid.Row="2" Grid.Column="1">
+            <StackPanel Spacing="8">
+                <TextBlock Text="{l:Loc Key=ui-apply-target}" FontWeight="SemiBold" />
+                <RadioButton x:Name="TargetCurrent" GroupName="target" IsChecked="True" Content="{l:Loc Key=ui-target-current}" Checked="Target_Changed" />
+                <RadioButton x:Name="TargetUser" GroupName="target" Content="{l:Loc Key=ui-target-user}" Checked="Target_Changed" />
+                <ComboBox x:Name="UserBox" Margin="28,0,0,0" MinWidth="220" IsEnabled="False" />
+                <RadioButton x:Name="TargetDefault" GroupName="target" Content="{l:Loc Key=ui-target-default}" Checked="Target_Changed" />
+                <RadioButton x:Name="TargetNew" GroupName="target" Content="{l:Loc Key=ui-target-new}" Checked="Target_Changed" />
+                <StackPanel x:Name="NewUserPanel" Margin="28,0,0,0" Spacing="6" Visibility="Collapsed">
+                    <TextBox x:Name="NewUserName" Header="{l:Loc Key=ui-new-user-name}" />
+                    <PasswordBox x:Name="NewUserPassword" Header="{l:Loc Key=ui-new-user-password}" />
+                    <CheckBox x:Name="NewUserAdmin" Content="{l:Loc Key=ui-new-user-admin}" />
+                </StackPanel>
+
+                <TextBlock Text="{l:Loc Key=ui-apply-options}" FontWeight="SemiBold" Margin="0,12,0,0" />
+                <CheckBox x:Name="InstallBox" IsChecked="True" Content="{l:Loc Key=ui-opt-install}" Checked="Install_Checked" />
+                <CheckBox x:Name="InstalledOnlyBox" Content="{l:Loc Key=ui-opt-installed-only}" Checked="InstalledOnly_Checked" />
+                <CheckBox x:Name="BackupBox" IsChecked="True" Content="{l:Loc Key=ui-opt-backup}" />
+                <CheckBox x:Name="MachineBox" IsChecked="True" Content="{l:Loc Key=ui-opt-machine}" />
+                <CheckBox x:Name="DryRunBox" Content="{l:Loc Key=ui-opt-dryrun}" />
+
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,12,0,0">
+                    <Button Content="{l:Loc Key=ui-apply-start}" Click="Start_Click" Style="{StaticResource AccentButtonStyle}" />
+                    <Button Content="{l:Loc Key=ui-apply-compare}" Click="Compare_Click" />
+                </StackPanel>
+                <TextBlock x:Name="AdminHint" Text="{l:Loc Key=ui-apply-admin-hint}" TextWrapping="Wrap" FontSize="12"
+                           Foreground="{ThemeResource SystemFillColorCautionBrush}" Visibility="Collapsed" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

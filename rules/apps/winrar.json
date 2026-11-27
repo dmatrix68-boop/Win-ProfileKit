@@ -1,0 +1,16 @@
+{
+  "id": "winrar",
+  "displayName": "WinRAR",
+  "wingetId": "RARLab.WinRAR",
+  "files": [
+    { "path": "%APPDATA%\\WinRAR\\rarreg.key", "kind": "Keyfile" },
+    { "path": "%PROGRAMFILES%\\WinRAR\\rarreg.key", "kind": "Keyfile" }
+  ],
+  "registry": [
+    { "key": "HKCU\\Software\\WinRAR" },
+    { "key": "HKCU\\Software\\WinRAR SFX" }
+  ],
+  "processes": [ "WinRAR" ],
+  "origin": "Catalog",
+  "notes": "Einstellungen in HKCU\\Software\\WinRAR. Der Lizenzschlüssel rarreg.key liegt je nach Installation im Programmordner oder in %APPDATA%\\WinRAR; beide Orte werden erfasst. Den Programmordner zu beschreiben erfordert Administratorrechte."
+}

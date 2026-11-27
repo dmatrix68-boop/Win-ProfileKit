@@ -1,0 +1,11 @@
+{
+  "id": "7zip",
+  "displayName": "7-Zip",
+  "wingetId": "7zip.7zip",
+  "registry": [
+    { "key": "HKCU\\Software\\7-Zip" }
+  ],
+  "processes": [ "7zFM", "7zG" ],
+  "origin": "Catalog",
+  "notes": "Alle Einstellungen (Dateimanager, Kontextmenü-Optionen, Kompression) liegen unter HKCU\\Software\\7-Zip. Die Dateizuordnungen selbst sind nicht enthalten."
+}
