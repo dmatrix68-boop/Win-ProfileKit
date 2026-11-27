@@ -43,7 +43,7 @@ public static class PackageSources
         packages.Select(p => new SourcePackage(p.Id, p.Id)).ToList();
 
     /// <summary>
-    /// Liste der Pakete ohne eigene Einstellungen (eine winget-ID je Zeile, <c>#</c> leitet Kommentare ein,
+    /// Liste der Pakete ohne eigene Einstellungen (eine winget-ID oder ein Programmname je Zeile, <c>#</c> leitet Kommentare ein,
     /// <c>*</c> am Ende als Platzhalter, z. B. <c>Microsoft.DotNet.*</c>).
     /// </summary>
     public static IReadOnlyList<string> ParseSkipList(string text) =>
@@ -91,7 +91,7 @@ public static class BatchPlanner
             var id = byWinget?.Id ?? ModuleIds.FromName(pkg.Name);
 
             if (byWinget is not null) { plan.Add(new(pkg, id, BatchDecision.HasRule, byWinget.DisplayName)); continue; }
-            if (pkg.WingetId is not null && skip.Any(g => g.IsMatch(pkg.WingetId))) { plan.Add(new(pkg, id, BatchDecision.NoSettings)); continue; }
+            if (skip.Any(g => (pkg.WingetId is not null && g.IsMatch(pkg.WingetId)) || g.IsMatch(pkg.Name))) { plan.Add(new(pkg, id, BatchDecision.NoSettings)); continue; }
 
             var byId = catalog.Find(id);
             if (byId is not null)

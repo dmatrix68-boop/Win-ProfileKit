@@ -1,6 +1,7 @@
 # Pakete ohne eigene, übertragbare Einstellungen.
 # Der Stapelmodus von 'profilekit ai discover' überspringt sie.
-# Eine winget-ID je Zeile, '*' als Platzhalter, '#' für Kommentare.
+# Eine winget-ID oder ein Programmname (für Store-/Chocolatey-Pakete) je Zeile,
+# '*' als Platzhalter, '#' für Kommentare.
 
 # Laufzeitumgebungen und Frameworks
 Microsoft.AppInstaller
@@ -20,3 +21,4 @@ Google.QuickShare
 Microsoft.BingWallpaper
 CrystalRich.LockHunter
 ForensiT.Transwiz
+Modern Winver

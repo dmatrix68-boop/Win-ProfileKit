@@ -53,7 +53,7 @@ public class BatchDiscoveryTests
         Assert.Equal(BatchDecision.NoSettings, plan[".NET Desktop Runtime 10"].Decision);
         Assert.Equal(BatchDecision.HasProposal, plan["AIDA64 Extreme"].Decision);
         Assert.Equal(BatchDecision.HasRule, plan["Rustdesk"].Decision);          // ID "rustdesk" ohne winget-ID → Katalogregel zuständig
-        Assert.Equal(BatchDecision.Discover, plan["Modern Winver"].Decision);
+        Assert.Equal(BatchDecision.NoSettings, plan["Modern Winver"].Decision);  // Store-Paket, per Name übersprungen
         Assert.Equal(BatchDecision.IdConflict, plan["7zip"].Decision);           // gleiche ID, andere winget-ID
 
         var retry = BatchPlanner.Plan(PackageSources.FromOemProject(OemProject), Catalog, ["aida64extreme"], Skip, retryProposals: true);
