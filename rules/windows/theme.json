@@ -1,0 +1,18 @@
+{
+  "id": "windows.theme",
+  "displayName": "Windows: Design und Farben / Theme and colors",
+  "registry": [
+    {
+      "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+      "values": [ "AppsUseLightTheme", "SystemUsesLightTheme", "EnableTransparency", "ColorPrevalence" ]
+    },
+    { "key": "HKCU\\Software\\Microsoft\\Windows\\DWM", "values": [ "AccentColor", "ColorizationColor", "ColorPrevalence" ] },
+    {
+      "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Accent",
+      "values": [ "AccentPalette", "AccentColorMenu", "StartColorMenu" ]
+    }
+  ],
+  "postApply": [ "theme" ],
+  "origin": "Catalog",
+  "notes": "Hell/Dunkel-Modus, Transparenz und Akzentfarbe. Hintergrundbild und .theme-Dateien sind nicht enthalten."
+}

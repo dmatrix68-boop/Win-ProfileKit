@@ -1,0 +1,9 @@
+{
+  "id": "windows.clipboard",
+  "displayName": "Windows: Zwischenablageverlauf / Clipboard history (Win+V)",
+  "registry": [
+    { "key": "HKCU\\Software\\Microsoft\\Clipboard", "values": [ "EnableClipboardHistory" ] }
+  ],
+  "origin": "Catalog",
+  "notes": "EnableClipboardHistory = 1 aktiviert den Verlauf (Win+V). Der Inhalt des Verlaufs wird nicht übertragen."
+}

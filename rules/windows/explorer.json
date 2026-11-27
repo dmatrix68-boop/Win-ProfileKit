@@ -1,0 +1,13 @@
+{
+  "id": "windows.explorer",
+  "displayName": "Windows: Explorer",
+  "registry": [
+    {
+      "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+      "values": [ "HideFileExt", "Hidden", "ShowSuperHidden", "LaunchTo", "NavPaneExpandToCurrentFolder", "NavPaneShowAllFolders", "SeparateProcess", "ShowCompColor" ]
+    }
+  ],
+  "postApply": [ "explorer" ],
+  "origin": "Catalog",
+  "notes": "HideFileExt 0 = Dateiendungen anzeigen; Hidden 1 = versteckte Dateien anzeigen; LaunchTo 1 = 'Dieser PC'. Manche Werte greifen erst nach Neustart des Explorers oder erneuter Anmeldung."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "windows.mouse",
+  "displayName": "Windows: Maus / Mouse",
+  "registry": [
+    {
+      "key": "HKCU\\Control Panel\\Mouse",
+      "values": [ "MouseSensitivity", "MouseSpeed", "MouseThreshold1", "MouseThreshold2", "DoubleClickSpeed", "MouseHoverTime", "SwapMouseButtons" ]
+    },
+    { "key": "HKCU\\Control Panel\\Desktop", "values": [ "WheelScrollLines", "WheelScrollChars" ] }
+  ],
+  "postApply": [ "mouse" ],
+  "origin": "Catalog",
+  "notes": "MouseSensitivity 1–20 = Zeigergeschwindigkeit; MouseSpeed/MouseThreshold1/2 = 'Zeigerpräzision verbessern'. Live-Aktivierung über SystemParametersInfo. SwapMouseButtons wirkt erst nach der Anmeldung."
+}

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(PkTfm)-windows</TargetFramework>
+    <RootNamespace>ProfileKit.Windows</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ProfileKit.Core\ProfileKit.Core.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <!-- Ziel ist .NET 10 (LTS). Lokal unter Linux mit SDK 8: -p:PkTfm=net8.0 -->
+    <PkTfm Condition="'$(PkTfm)' == ''">net10.0</PkTfm>
+    <LangVersion>12</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Version>0.1.0</Version>
+    <Company>Win-ProfileKit</Company>
+    <Product>Win-ProfileKit</Product>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+</Project>
