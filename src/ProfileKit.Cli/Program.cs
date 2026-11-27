@@ -29,6 +29,8 @@ if (cli.Positional.Count == 0 || cli.Has("help") || cli.Positional[0] is "help")
 try
 {
     var commands = new Commands(cli);
+    var ai = new AiCommands(cli, commands.LoadCatalog);
+    string Sub(int i) => cli.Positional.Count > i ? cli.Positional[i].ToLowerInvariant() : "";
     return cli.Positional[0].ToLowerInvariant() switch
     {
         "users" => commands.Users(),
@@ -37,6 +39,25 @@ try
         "capture" => commands.Capture(),
         "info" => commands.Info(),
         "apply" => commands.Apply(),
+        "mcp" => Sub(1) switch
+        {
+            "" or "serve" => ai.Serve(),
+            "install" => ai.Install(),
+            "config" => ai.Config(),
+            _ => throw new CliException(Localizer.T("unknown-command", "mcp " + Sub(1))),
+        },
+        "ai" => Sub(1) switch
+        {
+            "status" or "" => ai.Status(),
+            "models" => ai.Models(),
+            "config" => ai.Configure(),
+            "key" => ai.Key(),
+            "discover" => ai.Discover(),
+            "proposals" => ai.ProposalsList(),
+            "accept" => ai.Accept(),
+            "reject" => ai.Reject(),
+            _ => throw new CliException(Localizer.T("unknown-command", "ai " + Sub(1))),
+        },
         "learn" when cli.Positional.Count >= 2 => cli.Positional[1].ToLowerInvariant() switch
         {
             "start" => commands.LearnStart(),
@@ -61,7 +82,8 @@ catch (UnauthorizedAccessException ex)
     return ExitCodes.Error;
 }
 catch (Exception ex) when (ex is IOException or ArgumentException or InvalidOperationException or InvalidDataException
-                               or FormatException or System.ComponentModel.Win32Exception or TimeoutException)
+                               or FormatException or System.ComponentModel.Win32Exception or TimeoutException
+                               or HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
 {
     Console.Error.WriteLine(Localizer.T("error", ex.Message));
     if (cli.Has("verbose")) Console.Error.WriteLine(ex);

@@ -17,7 +17,7 @@ internal sealed class Commands(CliArgs args)
     private static string ToolVersion =>
         typeof(Commands).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
 
-    private RuleCatalog LoadCatalog()
+    internal RuleCatalog LoadCatalog()
     {
         var dirs = new List<string>
         {

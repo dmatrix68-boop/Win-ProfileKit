@@ -31,6 +31,24 @@ internal static class HelpText
                                           Änderungen auswerten und als Regel speichern
                                           (Standard: %LOCALAPPDATA%\Win-ProfileKit\rules)
 
+        KI:
+          ai status                       gefundene KI-Anwendungen, Ollama, OpenRouter, gewählte Stufe
+          ai discover --app <Programm> [--winget <id>] [--id <modul-id>]
+                [--provider auto|claude-code|ollama|openrouter] [--model <m>] [--accept-cloud]
+                                          KI sucht die Einstellungen und legt einen Regelvorschlag ab
+          ai proposals [--show <id>]      offene Vorschläge anzeigen
+          ai accept <id> [--force]        Vorschlag als Regel übernehmen
+          ai reject <id>                  Vorschlag verwerfen
+          ai models --provider ollama|openrouter [--filter <text>] [--all]
+                                          verfügbare Modelle (live)
+          ai config [--provider …] [--ollama-url …] [--ollama-model …] [--openrouter-model …]
+                [--max-steps n] [--accept-cloud | --revoke-cloud]
+          ai key set [--stdin] | ai key remove
+                                          OpenRouter-Key in der Anmeldeinformationsverwaltung
+          mcp                             MCP-Server (stdio) für Claude Desktop, Claude Code u. a.
+          mcp install [--uninstall]       in Claude Desktop eintragen bzw. austragen
+          mcp config                      Konfiguration für andere MCP-Clients ausgeben
+
         Global:
           --lang de|en       Sprache (Standard: Systemsprache, auch PROFILEKIT_LANG)
           --rules <Ordner>   zusätzlicher Regelordner
@@ -63,6 +81,24 @@ internal static class HelpText
           learn stop --id <module-id> [--name <program>] [--winget <winget-id>] [--out <file>] [--force]
                                           evaluate the changes and save them as a rule
                                           (default: %LOCALAPPDATA%\Win-ProfileKit\rules)
+
+        AI:
+          ai status                       AI applications found, Ollama, OpenRouter, chosen tier
+          ai discover --app <program> [--winget <id>] [--id <module-id>]
+                [--provider auto|claude-code|ollama|openrouter] [--model <m>] [--accept-cloud]
+                                          the AI looks for the settings and stores a rule proposal
+          ai proposals [--show <id>]      list open proposals
+          ai accept <id> [--force]        accept a proposal as rule
+          ai reject <id>                  discard a proposal
+          ai models --provider ollama|openrouter [--filter <text>] [--all]
+                                          available models (live)
+          ai config [--provider …] [--ollama-url …] [--ollama-model …] [--openrouter-model …]
+                [--max-steps n] [--accept-cloud | --revoke-cloud]
+          ai key set [--stdin] | ai key remove
+                                          OpenRouter key in Windows Credential Manager
+          mcp                             MCP server (stdio) for Claude Desktop, Claude Code and others
+          mcp install [--uninstall]       register in / remove from Claude Desktop
+          mcp config                      print configuration for other MCP clients
 
         Global:
           --lang de|en       language (default: system language, also PROFILEKIT_LANG)

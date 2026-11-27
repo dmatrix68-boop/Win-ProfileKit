@@ -56,6 +56,16 @@ public sealed class WindowsRegistryBackend : IRegistryBackend, IDisposable
         return k is null ? null : ReadValue(k, normalized, name);
     }
 
+    public IReadOnlyList<string> GetSubKeyNames(string key)
+    {
+        try
+        {
+            using var k = Open(RegistryPath.Normalize(key), writable: false);
+            return k is null ? [] : k.GetSubKeyNames().Order(StringComparer.OrdinalIgnoreCase).ToList();
+        }
+        catch (System.Security.SecurityException) { return []; }
+    }
+
     public void Write(CoreRegistryValue value)
     {
         var (root, sub) = Resolve(RegistryPath.Normalize(value.Key));

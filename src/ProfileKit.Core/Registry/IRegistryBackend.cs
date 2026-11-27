@@ -17,6 +17,9 @@ public interface IRegistryBackend
 
     /// <summary>Liest einen einzelnen Wert oder null.</summary>
     RegistryValue? Get(string key, string name);
+
+    /// <summary>Namen der direkten Unterschlüssel; leer, wenn der Schlüssel fehlt.</summary>
+    IReadOnlyList<string> GetSubKeyNames(string key);
 }
 
 /// <summary>Hilfsfunktionen für Registry-Pfade.</summary>

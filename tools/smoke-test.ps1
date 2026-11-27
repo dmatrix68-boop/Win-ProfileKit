@@ -110,5 +110,54 @@ if (Test-Path $learned) {
     Assert-True $false 'Lernmodus: Regel geschrieben'
 }
 
+# --- MCP-Server über stdio --------------------------------------------------------------
+$psi = [Diagnostics.ProcessStartInfo]::new((Resolve-Path $Exe).Path)
+$psi.ArgumentList.Add('mcp'); $psi.ArgumentList.Add('--rules'); $psi.ArgumentList.Add($rules)
+$psi.UseShellExecute = $false
+$psi.RedirectStandardInput = $true
+$psi.RedirectStandardOutput = $true
+$psi.RedirectStandardError = $true
+$mcp = [Diagnostics.Process]::Start($psi)
+$requests = @(
+    @{ jsonrpc = '2.0'; id = 1; method = 'initialize'; params = @{ protocolVersion = '2025-06-18'; capabilities = @{}; clientInfo = @{ name = 'smoke' } } },
+    @{ jsonrpc = '2.0'; method = 'notifications/initialized' },
+    @{ jsonrpc = '2.0'; id = 2; method = 'tools/list' },
+    @{ jsonrpc = '2.0'; id = 3; method = 'tools/call'; params = @{ name = 'read_registry'; arguments = @{ key = 'HKCU\Software\ProfileKitSmoke'; recurse = $true } } },
+    @{ jsonrpc = '2.0'; id = 4; method = 'tools/call'; params = @{ name = 'search_paths'; arguments = @{ query = 'ProfileKitSmoke' } } },
+    @{ jsonrpc = '2.0'; id = 5; method = 'tools/call'; params = @{ name = 'read_file'; arguments = @{ path = 'C:\Windows\System32\drivers\etc\hosts' } } },
+    @{ jsonrpc = '2.0'; id = 6; method = 'tools/call'; params = @{ name = 'propose_rule'; arguments = @{ rule = @{
+        id = 'smoke.mcp'; displayName = 'Smoke MCP'; notes = 'via smoke test'
+        files = @(@{ path = '%APPDATA%\ProfileKitSmoke' }); registry = @(@{ key = 'HKCU\Software\ProfileKitSmoke' }); excludes = @('*.log') } } } }
+)
+foreach ($r in $requests) { $mcp.StandardInput.WriteLine(($r | ConvertTo-Json -Compress -Depth 10)) }
+$mcp.StandardInput.Close()
+$out = $mcp.StandardOutput.ReadToEnd()
+$mcp.WaitForExit(30000) | Out-Null
+$responses = @{}
+foreach ($line in ($out -split "`n" | Where-Object { $_.Trim() })) { $j = $line | ConvertFrom-Json; $responses[[int]$j.id] = $j }
+Assert-True ($responses.Count -eq 6) "MCP: 6 Antworten auf 7 Nachrichten (Notification ohne Antwort) – erhalten: $($responses.Count)"
+Assert-True ($responses[1].result.protocolVersion -eq '2025-06-18') 'MCP: initialize'
+Assert-True ($responses[2].result.tools.Count -eq 7) "MCP: tools/list ($($responses[2].result.tools.Count) Werkzeuge)"
+Assert-True ($responses[3].result.content[0].text -like '*LastDir*') 'MCP: read_registry liest HKCU'
+Assert-True ($responses[4].result.content[0].text -like '*ProfileKitSmoke*') 'MCP: search_paths findet Ordner/Schlüssel'
+Assert-True ($responses[5].result.isError -eq $true) 'MCP: Zugriff auf C:\Windows verweigert'
+Assert-True ($responses[6].result.content[0].text -like '*"stored": true*') "MCP: propose_rule gespeichert"
+
+Invoke-Pk @('ai', 'proposals')
+Invoke-Pk @('ai', 'proposals', '--show', 'smoke.mcp')
+Invoke-Pk @('ai', 'accept', 'smoke.mcp')
+Assert-True (Test-Path (Join-Path $env:LOCALAPPDATA 'Win-ProfileKit\rules\smoke.mcp.json')) 'KI-Vorschlag als Regel übernommen'
+
+# --- KI-Status, Anmeldeinformationsverwaltung, MCP-Konfiguration ------------------------
+'sk-or-dummy-smoke' | & $Exe ai key set --stdin --lang de
+Assert-True ($LASTEXITCODE -eq 0) 'API-Key in der Anmeldeinformationsverwaltung gespeichert'
+$status = & $Exe ai status --lang de | Out-String
+Write-Host $status
+Assert-True ($status -match 'OpenRouter: Key ja') 'ai status erkennt den gespeicherten Key'
+& $Exe ai key remove --lang de | Out-Null
+Assert-True ((& $Exe ai status --lang de | Out-String) -match 'OpenRouter: Key nein') 'API-Key entfernt'
+$config = & $Exe mcp config | Out-String
+Assert-True ($config -match 'win-profilekit') 'mcp config gibt Client-Konfiguration aus'
+
 if ($failures -gt 0) { Write-Host "`n$failures Fehler" -ForegroundColor Red; exit 1 }
 Write-Host "`nAlle Smoke-Tests bestanden." -ForegroundColor Green

@@ -8,8 +8,8 @@ Benutzer** an – inklusive winget-Installation fehlender Programme. Gedacht fü
 Testbenutzer auf Installations-VMs und für den OEM-Skriptlauf
 ([OEM-script-gen](https://github.com/dmatrix68-boop/OEM-script-gen)).
 
-> Status: Phase 1 (Core + CLI) und Lernmodus. KI-Regelermittlung und WinUI-Oberfläche
-> folgen – siehe [SPEC.md](SPEC.md).
+> Status: Core + CLI, Lernmodus, MCP-Server und KI-Anbindung. WinUI-Oberfläche und
+> Sammler über Netzwerkfreigabe folgen – siehe [SPEC.md](SPEC.md).
 
 ## Funktionen (Phase 1)
 
@@ -26,6 +26,11 @@ Testbenutzer auf Installations-VMs und für den OEM-Skriptlauf
 * **Lernmodus**: `learn start` → Einstellungen im Programm ändern → `learn stop --id <modul>`
   erzeugt aus dem Vorher/Nachher-Vergleich eine Regel (Rauschen wie Caches, Logs und MRU-Listen
   wird herausgefiltert).
+* **KI-Suche**: `ai discover --app <Programm>` lässt eine KI die Speicherorte ermitteln – über
+  Claude Code, eine lokale Ollama-Installation oder OpenRouter. Über `mcp install` steht dieselbe
+  Funktion direkt in Claude Desktop zur Verfügung. Die KI kann nur lesen, Zugangsdaten und
+  Lizenzdateien bekommt sie nie zu sehen; ihre Ergebnisse sind Vorschläge, die du mit
+  `ai accept` übernimmst.
 * **winget**: fehlende Programme vor dem Konfigurieren installieren (`--install`).
 * **Sicherung** vorhandener Dateien und Werte vor dem Überschreiben, **Trockenlauf** mit `--dry-run`.
 * Zweisprachig (DE/EN), Profil als Ordner oder `.pkprofile`-Archiv.
@@ -52,6 +57,20 @@ Regel für ein neues Programm lernen:
 profilekit learn start
 :: … Programm öffnen, Einstellungen ändern, Programm schließen …
 profilekit learn stop --id wiztree --name WizTree --winget AntibodySoftware.WizTree
+```
+
+Regel per KI ermitteln:
+
+```bat
+profilekit ai status                              :: was ist installiert, welche Stufe wird genutzt?
+profilekit ai discover --app WizTree --winget AntibodySoftware.WizTree
+profilekit ai accept wiztree
+
+:: lokal mit Ollama
+profilekit ai discover --app WizTree --provider ollama --model qwen3
+
+:: in Claude Desktop nutzen
+profilekit mcp install
 ```
 
 Alle Befehle: `profilekit help`.

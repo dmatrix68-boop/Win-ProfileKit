@@ -203,6 +203,34 @@ werden.
 
 Der Agent kann keine Dateien schreiben, löschen oder Programme starten.
 
+**Umsetzung (Phase 3):**
+
+* Die Werkzeuge liegen im Core (`ProfileKit.Core.Agent`) und werden vom MCP-Server und vom eigenen
+  Agenten-Ablauf gleichermaßen genutzt: `list_installed_apps`, `search_paths`, `list_directory`,
+  `read_file`, `read_registry`, `get_rule`, `propose_rule`.
+* `AccessGuard` erzwingt die Grenze technisch: nur Token-Orte (Profil, AppData, ProgramData,
+  Programmordner) bzw. `HKCU\Software`, `HKCU\Control Panel`, `HKLM\SOFTWARE`; kein `..`, keine
+  Pfade außerhalb. Inhalte von Zugangsdaten, Schlüsseln, Zertifikaten, Browser-Daten, DPAPI und
+  Lizenzdateien werden nie herausgegeben, Registry-Werte mit Namen wie Password/Token/License/Serial
+  werden geschwärzt. Dateiinhalte max. 128 KB je Aufruf.
+* `propose_rule` prüft den Entwurf gegen den Rechner (Pfade/Schlüssel vorhanden, Größe, sensible
+  Dateien) und legt ihn nur in `%LOCALAPPDATA%\Win-ProfileKit\proposals` ab. Erst
+  `profilekit ai accept <id>` macht daraus eine Regel (`origin: Ai`).
+* MCP-Server: `profilekit mcp` (stdio, JSON-RPC 2.0, Protokollversionen 2024-11-05 bis 2025-11-25),
+  Werkzeuge mit `readOnlyHint`, Prompt `discover_settings`. `profilekit mcp install` trägt ihn in
+  Claude Desktop ein (klassische und MSIX-Installation); `profilekit mcp config` gibt die
+  Konfiguration für andere Clients aus (ChatGPT, Copilot, Codex, Cursor … – dort manuell eintragen).
+* Stufe 1b: `claude -p` mit eigener MCP-Konfiguration (`--strict-mcp-config`); erlaubt sind nur die
+  Win-ProfileKit-Werkzeuge sowie Websuche/-abruf, Shell und Dateiwerkzeuge von Claude Code sind gesperrt.
+  Codex CLI und Copilot CLI werden erkannt, aber noch nicht automatisch gesteuert.
+* Stufen 2/3: eigener Agenten-Ablauf über die OpenAI-kompatible Chat-Completions-API
+  (Ollama `…/v1`, OpenRouter), max. 30 Schritte (einstellbar), eine Erinnerung, falls das Modell
+  ohne Vorschlag aufhört. Modelle werden live abgefragt (`profilekit ai models`), keines ist fest
+  verdrahtet; OpenRouter-Modelle werden auf Tool-Unterstützung gefiltert.
+* Einstellungen in `%LOCALAPPDATA%\Win-ProfileKit\ai.json`, OpenRouter-Key in der
+  Windows-Anmeldeinformationsverwaltung (`Win-ProfileKit/OpenRouter`). Vor der ersten Nutzung von
+  OpenRouter ist eine ausdrückliche Zustimmung nötig (`--accept-cloud`), widerrufbar.
+
 ### 4.9 Integration in den OEM-Skriptgenerator
 Repository: `dmatrix68-boop/OEM-script-gen`.
 
@@ -254,6 +282,10 @@ profilekit user create <Name> [--admin] [--password-stdin]
 profilekit learn start [--machine] [--exclude <Muster;Muster>]
 profilekit learn diff
 profilekit learn stop --id <modul-id> [--name <Programm>] [--winget <id>] [--out <Datei>] [--force]
+profilekit ai status | models | config | key set|remove
+profilekit ai discover --app <Programm> [--winget <id>] [--id <modul-id>] [--provider …] [--model …]
+profilekit ai proposals [--show <id>] | accept <id> | reject <id>
+profilekit mcp | mcp install [--uninstall] | mcp config
 Global: --lang de|en, --rules <Ordner>, --verbose
 ```
 
@@ -263,7 +295,7 @@ Global: --lang de|en, --rules <Ordner>, --verbose
 |---|---|
 | **1** | Core, Windows-Schicht, CLI: Katalog, Inventar, Capture, Apply (alle Zielarten), Benutzer anlegen, Windows-Module, CI |
 | **2** | Lernmodus ✅, Sammler über Freigabe, Offline-VHDX, Abgleich Quelle/Ziel |
-| **3** | MCP-Server, KI-Stufen 1a/1b/2/3, Regelvorschläge mit Validierung |
+| **3** | MCP-Server ✅, KI-Stufen 1a (Claude Desktop) ✅ / 1b (Claude Code) ✅ / 2 ✅ / 3 ✅, Regelvorschläge mit Validierung ✅ |
 | **4** | WinUI-3-Oberfläche (DE/EN) |
 | **5** | Integration in den OEM-Skriptgenerator (eigener PR dort) |
 

@@ -43,6 +43,17 @@ public sealed class MemoryRegistryBackend : IRegistryBackend
         values[value.Name] = value with { Key = key };
     }
 
+    public IReadOnlyList<string> GetSubKeyNames(string key)
+    {
+        var prefix = RegistryPath.Normalize(key) + "\\";
+        return _keys.Keys
+            .Where(k => k.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            .Select(k => k[prefix.Length..].Split('\\')[0])
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
     public RegistryValue? Get(string key, string name) =>
         _keys.TryGetValue(RegistryPath.Normalize(key), out var values) && values.TryGetValue(name, out var v) ? v : null;
 }

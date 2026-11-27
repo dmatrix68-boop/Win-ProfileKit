@@ -6,7 +6,7 @@ public sealed class CliArgs
     private static readonly HashSet<string> Flags = new(StringComparer.OrdinalIgnoreCase)
     {
         "current-user", "default-user", "install", "dry-run", "no-backup", "installed", "admin",
-        "password-stdin", "verbose", "no-machine", "zip", "help", "machine", "force",
+        "password-stdin", "verbose", "no-machine", "zip", "help", "machine", "force", "accept-cloud", "revoke-cloud", "stdin", "all", "uninstall",
     };
 
     private readonly Dictionary<string, string?> _options = new(StringComparer.OrdinalIgnoreCase);
