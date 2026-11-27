@@ -21,6 +21,7 @@ OEM-Skriptlauf). Verwandtes Repo: `dmatrix68-boop/OEM-script-gen`.
 | `src/ProfileKit.Windows` | Registry, Offline-Hives, Benutzer, winget, P/Invoke |
 | `src/ProfileKit.Cli` | `profilekit.exe` |
 | `src/ProfileKit.App` | WinUI-3-Oberfläche `profilekit-gui.exe` – liest über Core/Windows, führt Aktionen über `profilekit.exe` aus |
+| `src/ProfileKit.Launcher` | Starter `profilekit-gui.exe` im Root der Release-Pakete (.NET Framework 4.8) – prüft die Runtime und startet `app\profilekit-gui.exe` |
 | `tests/ProfileKit.Core.Tests` | xUnit-Tests für Core |
 | `rules/apps`, `rules/windows` | Regelkatalog (JSON, eine Datei je Modul) |
 

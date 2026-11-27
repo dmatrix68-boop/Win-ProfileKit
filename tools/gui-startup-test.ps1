@@ -1,20 +1,34 @@
 <#
   Startet die Oberfläche und prüft, ob sie läuft (fängt Fehler beim Laden von XAML,
   fehlende Abhängigkeiten der Windows App SDK und Abstürze beim Start ab).
+  -Launcher: $Exe ist der Starter im Root eines Release-Pakets, der app\profilekit-gui.exe startet.
 #>
 param(
     [Parameter(Mandatory)] [string] $Exe,
-    [int] $Seconds = 20
+    [int] $Seconds = 20,
+    [switch] $Launcher
 )
 $ErrorActionPreference = 'Stop'
 $exePath = (Resolve-Path $Exe).Path
+$exeDir = Split-Path $exePath
+# CLI und Regelkatalog liegen neben der Oberfläche oder (Release-Paket mit app\) eine Ebene darüber
+$kitHome = if (Test-Path (Join-Path $exeDir 'profilekit.exe')) { $exeDir } else { Split-Path $exeDir }
 foreach ($f in @('profilekit.exe', 'rules\apps\7zip.json', 'rules\no-settings.list')) {
-    $p = Join-Path (Split-Path $exePath) $f
-    if (-not (Test-Path $p)) { Write-Host "FEHLT: $f" -ForegroundColor Red; exit 1 }
+    $p = Join-Path $kitHome $f
+    if (-not (Test-Path $p)) { Write-Host "FEHLT: $p" -ForegroundColor Red; exit 1 }
 }
 
 $start = Get-Date
-$proc = Start-Process -FilePath $exePath -PassThru -WorkingDirectory (Split-Path $exePath)
+$proc = Start-Process -FilePath $exePath -PassThru -WorkingDirectory $exeDir
+if ($Launcher) {
+    $null = $proc.Handle
+    if (-not $proc.WaitForExit(120000)) { Write-Host 'Starter hat sich nicht beendet.' -ForegroundColor Red; exit 1 }
+    if ($proc.ExitCode -ne 0) { Write-Host "Starter-Exitcode $($proc.ExitCode)." -ForegroundColor Red; exit 1 }
+    $guiPath = Join-Path $exeDir 'app\profilekit-gui.exe'
+    $proc = Get-Process profilekit-gui -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $guiPath } | Select-Object -First 1
+    if (-not $proc) { Write-Host "Starter hat $guiPath nicht gestartet." -ForegroundColor Red; exit 1 }
+    Write-Host "Starter hat $guiPath gestartet."
+}
 Start-Sleep -Seconds $Seconds
 $proc.Refresh()
 

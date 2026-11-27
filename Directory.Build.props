@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
-    <Version>0.1.0</Version>
+    <Version>1.0.0</Version>
     <Company>Win-ProfileKit</Company>
     <Product>Win-ProfileKit</Product>
     <InvariantGlobalization>false</InvariantGlobalization>

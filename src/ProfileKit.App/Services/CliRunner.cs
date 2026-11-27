@@ -11,7 +11,7 @@ public sealed class CliRunner
 {
     private Process? _process;
 
-    public static string CliPath => Path.Combine(AppContext.BaseDirectory, "profilekit.exe");
+    public static string CliPath => Path.Combine(AppPaths.Home, "profilekit.exe");
 
     public bool IsRunning => _process is { HasExited: false };
 
@@ -32,7 +32,7 @@ public sealed class CliRunner
             CreateNoWindow = true,
             StandardOutputEncoding = Encoding.UTF8,
             StandardErrorEncoding = Encoding.UTF8,
-            WorkingDirectory = AppContext.BaseDirectory,
+            WorkingDirectory = AppPaths.Home,
         };
         foreach (var a in args) psi.ArgumentList.Add(a);
 

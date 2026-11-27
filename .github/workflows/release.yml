@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag, z. B. v0.1.0'
+        description: 'Tag, z. B. v1.0.0'
         required: true
 
 permissions:
@@ -35,12 +35,20 @@ jobs:
       - name: Unit tests
         run: dotnet test tests/ProfileKit.Core.Tests -c Release --logger "console;verbosity=minimal"
 
+      # Paket-Layout: im Root nur profilekit-gui.exe (Starter, .NET Framework 4.8), profilekit.exe (CLI)
+      # und rules\; die Oberfläche liegt mit allen Abhängigkeiten in app\.
+      - name: Build launcher
+        shell: pwsh
+        run: dotnet publish src/ProfileKit.Launcher -c Release -p:Version=$env:VERSION -o out/launcher
+
       # 1) self-contained: läuft ohne installierte .NET-Runtime
       - name: Publish self-contained (GUI + CLI)
         shell: pwsh
         run: |
-          dotnet publish src/ProfileKit.App -c Release -r win-x64 -p:Platform=x64 --self-contained -p:Version=$env:VERSION -o out/sc
-          dotnet publish src/ProfileKit.Cli -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=$env:VERSION -o out/sc
+          dotnet publish src/ProfileKit.App -c Release -r win-x64 -p:Platform=x64 --self-contained -p:Version=$env:VERSION -o out/sc/app
+          dotnet publish src/ProfileKit.Cli -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -p:Version=$env:VERSION -o out/sc
+          Remove-Item out/sc/app/rules -Recurse
+          Copy-Item out/launcher/profilekit-gui.exe out/sc/
 
       - name: CLI-only package (self-contained, for the OEM run)
         shell: pwsh
@@ -53,26 +61,37 @@ jobs:
       - name: Publish framework-dependent (GUI + CLI)
         shell: pwsh
         run: |
-          dotnet publish src/ProfileKit.App -c Release -r win-x64 -p:Platform=x64 --no-self-contained -p:Version=$env:VERSION -o out/fd
-          dotnet publish src/ProfileKit.Cli -c Release -r win-x64 --no-self-contained -p:PublishSingleFile=true -p:Version=$env:VERSION -o out/fd
-          Copy-Item tools/Install-DotNetRuntime.ps1, tools/Start-ProfileKit.cmd out/fd/
+          dotnet publish src/ProfileKit.App -c Release -r win-x64 -p:Platform=x64 --no-self-contained -p:Version=$env:VERSION -o out/fd/app
+          dotnet publish src/ProfileKit.Cli -c Release -r win-x64 --no-self-contained -p:PublishSingleFile=true -p:DebugType=none -p:Version=$env:VERSION -o out/fd
+          Remove-Item out/fd/app/rules -Recurse
+          Copy-Item tools/Install-DotNetRuntime.ps1 out/fd/app/
+          Copy-Item out/launcher/profilekit-gui.exe out/fd/
+
+      - name: Check package layout (only .exe files in the root)
+        shell: pwsh
+        run: |
+          foreach ($d in 'out/sc', 'out/fd', 'out/cli') {
+            $loose = Get-ChildItem $d -File | Where-Object Extension -ne '.exe'
+            if ($loose) { throw "${d}: Dateien im Root: $($loose.Name -join ', ')" }
+            "$d : " + ((Get-ChildItem $d).Name -join ', ')
+          }
 
       - name: Smoke test CLI (real Windows, admin)
         shell: pwsh
         run: ./tools/smoke-test.ps1 -Exe ./out/sc/profilekit.exe
 
-      - name: Startup test GUI (self-contained)
+      - name: Startup test GUI via launcher (self-contained)
         shell: pwsh
-        run: ./tools/gui-startup-test.ps1 -Exe ./out/sc/profilekit-gui.exe
+        run: ./tools/gui-startup-test.ps1 -Exe ./out/sc/profilekit-gui.exe -Launcher
 
-      - name: Startup test GUI + runtime check (framework-dependent)
+      - name: Startup test GUI via launcher + runtime check (framework-dependent)
         shell: pwsh
         run: |
-          powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./out/fd/Install-DotNetRuntime.ps1 -CheckOnly
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./out/fd/app/Install-DotNetRuntime.ps1 -CheckOnly
           if ($LASTEXITCODE -ne 0) { throw "Runtime-Prüfung meldet $LASTEXITCODE" }
           & ./out/fd/profilekit.exe help --lang en | Out-Null
           if ($LASTEXITCODE -ne 0) { throw "profilekit.exe (framework-dependent) Exitcode $LASTEXITCODE" }
-          ./tools/gui-startup-test.ps1 -Exe ./out/fd/profilekit-gui.exe
+          ./tools/gui-startup-test.ps1 -Exe ./out/fd/profilekit-gui.exe -Launcher
 
       - name: Package
         shell: pwsh
@@ -97,11 +116,11 @@ jobs:
           | Datei / File | Inhalt / Contents |
           |---|---|
           | ``Win-ProfileKit-$v-win-x64.zip`` | **Empfohlen.** Oberfläche + CLI, self-contained – keine .NET-Installation nötig. / **Recommended.** GUI + CLI, self-contained – no .NET install needed. |
-          | ``Win-ProfileKit-$v-win-x64-net10.zip`` | Kleiner, für Rechner mit **.NET 10 Runtime**. ``Start-ProfileKit.cmd`` prüft die Runtime, installiert sie bei Bedarf und startet die Oberfläche (für Skripte: ``Install-DotNetRuntime.ps1``). / Smaller, for machines with the **.NET 10 runtime**. ``Start-ProfileKit.cmd`` checks for the runtime, installs it if missing and starts the GUI (for scripts: ``Install-DotNetRuntime.ps1``). |
+          | ``Win-ProfileKit-$v-win-x64-net10.zip`` | Kleiner, für Rechner mit **.NET 10 Runtime**. ``profilekit-gui.exe`` prüft die Runtime, installiert sie bei Bedarf und startet die Oberfläche (für Skripte: ``app\Install-DotNetRuntime.ps1``). / Smaller, for machines with the **.NET 10 runtime**. ``profilekit-gui.exe`` checks for the runtime, installs it if missing and starts the GUI (for scripts: ``app\Install-DotNetRuntime.ps1``). |
           | ``profilekit-cli-$v-win-x64.zip`` | Nur ``profilekit.exe`` + Regelkatalog, self-contained – für den OEM-Lauf. / CLI only + rule catalog, self-contained – for the OEM run. |
           | ``SHA256SUMS.txt`` | Prüfsummen / checksums |
 
-          Windows 11 x64. ZIP entpacken, ``profilekit-gui.exe`` (bzw. ``Start-ProfileKit.cmd``) starten – keine Installation. / Unzip and run – no installation.
+          Windows 11 x64. ZIP entpacken, ``profilekit-gui.exe`` starten – keine Installation. Im Ordner liegen nur ``profilekit-gui.exe``, ``profilekit.exe`` (CLI), ``rules\`` und ``app\``. / Unzip and run ``profilekit-gui.exe`` – no installation.
 
           "@ | Set-Content notes.md -Encoding utf8
           $ghArgs = @('release', 'create', $env:TAG) + (Get-ChildItem dist).FullName +

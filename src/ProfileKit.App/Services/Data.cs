@@ -13,7 +13,7 @@ public static class Data
     public static string AiSettingsPath => AiSettings.PathFor(LocalAppData);
 
     public static RuleCatalog LoadCatalog() =>
-        RuleCatalog.Load(Path.Combine(AppContext.BaseDirectory, "rules"), UserRulesDirectory);
+        RuleCatalog.Load(Path.Combine(AppPaths.Home, "rules"), UserRulesDirectory);
 
     public static ProposalStore Proposals => new(ProposalStore.DefaultDirectory(LocalAppData));
 

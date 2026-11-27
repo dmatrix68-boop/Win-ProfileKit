@@ -302,6 +302,12 @@ Repository: `dmatrix68-boop/OEM-script-gen`.
   Paket (`…-net10.zip`) für interaktive Nutzung auf Rechnern mit .NET 10 Runtime;
   `tools/Install-DotNetRuntime.ps1` prüft und installiert die Runtime bei Bedarf. Für den
   OEM-Lauf bleibt das self-contained Paket maßgeblich.
+* Paket-Layout: Im Root liegen nur `profilekit-gui.exe`, `profilekit.exe` und `rules\`; die
+  Oberfläche liegt mit allen Abhängigkeiten in `app\`. `profilekit-gui.exe` im Root ist ein
+  kleiner Starter (`src/ProfileKit.Launcher`, .NET Framework 4.8, in Windows enthalten), der bei
+  framework-abhängiger Oberfläche die Runtime prüft, sie bei Bedarf über
+  `app\Install-DotNetRuntime.ps1` installiert und `app\profilekit-gui.exe` startet. Die
+  Oberfläche sucht `profilekit.exe` und `rules\` neben sich oder eine Ebene darüber.
 
 ## 5. Architektur
 
