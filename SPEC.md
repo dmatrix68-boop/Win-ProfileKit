@@ -298,6 +298,10 @@ Repository: `dmatrix68-boop/OEM-script-gen`.
 * Die CLI ist eine **self-contained Single-File-EXE** (keine .NET-Runtime auf dem
   frisch installierten System nötig) und arbeitet ohne Oberfläche und ohne Rückfragen.
   Exitcodes: `0` OK, `1` Fehler, `2` Teilerfolg, `3` ungültige Argumente.
+* Releases (`release.yml`, Tag `v*`) enthalten zusätzlich ein kleineres framework-abhängiges
+  Paket (`…-net10.zip`) für interaktive Nutzung auf Rechnern mit .NET 10 Runtime;
+  `tools/Install-DotNetRuntime.ps1` prüft und installiert die Runtime bei Bedarf. Für den
+  OEM-Lauf bleibt das self-contained Paket maßgeblich.
 
 ## 5. Architektur
 

@@ -1,0 +1,111 @@
+name: release
+
+# Baut die Release-Pakete und veröffentlicht sie als GitHub-Release.
+# Auslösen: Tag vX.Y.Z pushen oder manuell mit Tag (wird dann am aktuellen Commit angelegt).
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag, z. B. v0.1.0'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Version aus Tag
+        shell: pwsh
+        run: |
+          if ($env:TAG -notmatch '^v(\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?)$') { throw "Tag '$env:TAG' hat nicht das Format vX.Y.Z" }
+          "VERSION=$($Matches[1])" >> $env:GITHUB_ENV
+
+      - name: Unit tests
+        run: dotnet test tests/ProfileKit.Core.Tests -c Release --logger "console;verbosity=minimal"
+
+      # 1) self-contained: läuft ohne installierte .NET-Runtime
+      - name: Publish self-contained (GUI + CLI)
+        shell: pwsh
+        run: |
+          dotnet publish src/ProfileKit.App -c Release -r win-x64 -p:Platform=x64 --self-contained -p:Version=$env:VERSION -o out/sc
+          dotnet publish src/ProfileKit.Cli -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=$env:VERSION -o out/sc
+
+      - name: CLI-only package (self-contained, for the OEM run)
+        shell: pwsh
+        run: |
+          New-Item out/cli -ItemType Directory | Out-Null
+          Copy-Item out/sc/profilekit.exe out/cli/
+          Copy-Item out/sc/rules out/cli/rules -Recurse
+
+      # 2) framework-abhängig: kleiner, braucht die .NET-10-Runtime (Prüfung/Installation per Skript)
+      - name: Publish framework-dependent (GUI + CLI)
+        shell: pwsh
+        run: |
+          dotnet publish src/ProfileKit.App -c Release -r win-x64 -p:Platform=x64 --no-self-contained -p:Version=$env:VERSION -o out/fd
+          dotnet publish src/ProfileKit.Cli -c Release -r win-x64 --no-self-contained -p:PublishSingleFile=true -p:Version=$env:VERSION -o out/fd
+          Copy-Item tools/Install-DotNetRuntime.ps1, tools/Start-ProfileKit.cmd out/fd/
+
+      - name: Smoke test CLI (real Windows, admin)
+        shell: pwsh
+        run: ./tools/smoke-test.ps1 -Exe ./out/sc/profilekit.exe
+
+      - name: Startup test GUI (self-contained)
+        shell: pwsh
+        run: ./tools/gui-startup-test.ps1 -Exe ./out/sc/profilekit-gui.exe
+
+      - name: Startup test GUI + runtime check (framework-dependent)
+        shell: pwsh
+        run: |
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./out/fd/Install-DotNetRuntime.ps1 -CheckOnly
+          if ($LASTEXITCODE -ne 0) { throw "Runtime-Prüfung meldet $LASTEXITCODE" }
+          & ./out/fd/profilekit.exe help --lang en | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw "profilekit.exe (framework-dependent) Exitcode $LASTEXITCODE" }
+          ./tools/gui-startup-test.ps1 -Exe ./out/fd/profilekit-gui.exe
+
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item dist -ItemType Directory | Out-Null
+          Compress-Archive out/sc/*  "dist/Win-ProfileKit-$env:VERSION-win-x64.zip"
+          Compress-Archive out/fd/*  "dist/Win-ProfileKit-$env:VERSION-win-x64-net10.zip"
+          Compress-Archive out/cli/* "dist/profilekit-cli-$env:VERSION-win-x64.zip"
+          Get-ChildItem dist/*.zip | ForEach-Object { "$((Get-FileHash $_ -Algorithm SHA256).Hash.ToLower())  $($_.Name)" } |
+            Set-Content dist/SHA256SUMS.txt -Encoding ascii
+          Get-ChildItem dist | ForEach-Object { '{0,-50} {1,8:N1} MB' -f $_.Name, ($_.Length / 1MB) }
+
+      - name: Create release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $v = $env:VERSION
+          @"
+          ## Downloads
+
+          | Datei / File | Inhalt / Contents |
+          |---|---|
+          | ``Win-ProfileKit-$v-win-x64.zip`` | **Empfohlen.** Oberfläche + CLI, self-contained – keine .NET-Installation nötig. / **Recommended.** GUI + CLI, self-contained – no .NET install needed. |
+          | ``Win-ProfileKit-$v-win-x64-net10.zip`` | Kleiner, für Rechner mit **.NET 10 Runtime**. ``Start-ProfileKit.cmd`` prüft die Runtime, installiert sie bei Bedarf und startet die Oberfläche (für Skripte: ``Install-DotNetRuntime.ps1``). / Smaller, for machines with the **.NET 10 runtime**. ``Start-ProfileKit.cmd`` checks for the runtime, installs it if missing and starts the GUI (for scripts: ``Install-DotNetRuntime.ps1``). |
+          | ``profilekit-cli-$v-win-x64.zip`` | Nur ``profilekit.exe`` + Regelkatalog, self-contained – für den OEM-Lauf. / CLI only + rule catalog, self-contained – for the OEM run. |
+          | ``SHA256SUMS.txt`` | Prüfsummen / checksums |
+
+          Windows 11 x64. ZIP entpacken, ``profilekit-gui.exe`` (bzw. ``Start-ProfileKit.cmd``) starten – keine Installation. / Unzip and run – no installation.
+
+          "@ | Set-Content notes.md -Encoding utf8
+          $ghArgs = @('release', 'create', $env:TAG) + (Get-ChildItem dist).FullName +
+            @('--title', "Win-ProfileKit $v", '--notes-file', 'notes.md', '--generate-notes', '--target', $env:GITHUB_SHA)
+          if ($v.Contains('-')) { $ghArgs += '--prerelease' }
+          gh @ghArgs
+          if ($LASTEXITCODE -ne 0) { throw "gh release create: Exitcode $LASTEXITCODE" }

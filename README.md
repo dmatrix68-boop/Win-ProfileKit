@@ -44,8 +44,19 @@ die Einstellungen für KI-Stufen, OpenRouter-Key und Claude Desktop. Alle Aktion
 `profilekit.exe`, deren Ausgabe im Protokoll unten erscheint. Ohne Administratorrechte bietet die
 Oberfläche einen Neustart als Administrator an.
 
-Download: Artefakt `profilekit-gui-win-x64` der CI (Ordner entpacken, `profilekit-gui.exe` starten –
-keine Installation nötig).
+## Download
+
+Unter [Releases](https://github.com/dmatrix68-boop/Win-ProfileKit/releases/latest):
+
+| Datei | Inhalt |
+|---|---|
+| `Win-ProfileKit-<version>-win-x64.zip` | **Empfohlen.** Oberfläche + CLI, self-contained – entpacken, `profilekit-gui.exe` starten, keine Installation nötig. |
+| `Win-ProfileKit-<version>-win-x64-net10.zip` | Kleinere Variante für Rechner mit .NET 10 Runtime. `Start-ProfileKit.cmd` prüft die Runtime, installiert sie bei Bedarf (offizieller Microsoft-Installer, Signatur wird geprüft, Adminrechte nötig) und startet die Oberfläche. |
+| `profilekit-cli-<version>-win-x64.zip` | Nur `profilekit.exe` + Regelkatalog, self-contained – für den OEM-Lauf. |
+| `SHA256SUMS.txt` | Prüfsummen. |
+
+Für Skripte: `powershell -ExecutionPolicy Bypass -File Install-DotNetRuntime.ps1 [-CheckOnly]`
+(Exitcode 0 = Runtime vorhanden/installiert, 2 = fehlt bei `-CheckOnly`, 1 = Fehler).
 
 ## Beispiele
 
@@ -114,7 +125,8 @@ dotnet publish src\ProfileKit.Cli -c Release -r win-x64 --self-contained -p:Publ
 
 Die CI baut auf `windows-latest`, führt die Unit-Tests und einen Integrationstest
 (`tools/smoke-test.ps1`: Benutzer anlegen, Offline-Hive, Default-Profil) aus und stellt
-`profilekit.exe` als Artefakt bereit.
+`profilekit.exe` als Artefakt bereit. Ein Tag `v*` (z. B. `git tag v0.2.0 && git push origin v0.2.0`)
+startet `release.yml`, das die Release-Pakete baut, testet und als GitHub-Release veröffentlicht.
 
 ## Grenzen
 
@@ -134,6 +146,12 @@ installation VMs and for unattended OEM setup runs.
 
 Run `profilekit help --lang en` for all commands. Requirements and roadmap: [SPEC.md](SPEC.md)
 (German).
+
+Download from [Releases](https://github.com/dmatrix68-boop/Win-ProfileKit/releases/latest):
+`Win-ProfileKit-<version>-win-x64.zip` (recommended, self-contained, no install needed),
+`Win-ProfileKit-<version>-win-x64-net10.zip` (smaller, needs the .NET 10 runtime –
+`Start-ProfileKit.cmd` checks for it, installs it if missing and starts the GUI) or
+`profilekit-cli-<version>-win-x64.zip` (CLI only, for the OEM run).
 
 ## Lizenz / License
 
