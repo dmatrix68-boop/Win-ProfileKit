@@ -18,6 +18,6 @@
     <ProjectReference Include="..\..\src\ProfileKit.Core\ProfileKit.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\rules\**\*.json" LinkBase="rules" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\rules\**\*.json;..\..\rules\*.list" LinkBase="rules" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

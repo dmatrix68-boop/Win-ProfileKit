@@ -66,6 +66,10 @@ profilekit ai status                              :: was ist installiert, welche
 profilekit ai discover --app WizTree --winget AntibodySoftware.WizTree
 profilekit ai accept wiztree
 
+:: alle Programme eines OEM-Projekts ohne Regel nacheinander untersuchen
+profilekit ai discover --from-oemproj MusterPC2.oemproj.json --dry-run
+profilekit ai discover --from-oemproj MusterPC2.oemproj.json
+
 :: lokal mit Ollama
 profilekit ai discover --app WizTree --provider ollama --model qwen3
 

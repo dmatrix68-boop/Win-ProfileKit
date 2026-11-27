@@ -144,12 +144,75 @@ internal sealed class AiCommands(CliArgs args, Func<RuleCatalog> loadCatalog)
 
     public int Discover()
     {
-        var program = args.Get("app") ?? (args.Positional.Count >= 3 ? args.Positional[2] : null)
-            ?? throw new CliException(T("missing-option", "--app <Programm>"));
-        var moduleId = args.Get("id") ?? ModuleIds.FromName(program);
-        ProfilePackage.ValidateId(moduleId);
-        var wingetId = args.Get("winget");
+        var batch = args.Has("from-oemproj") || args.Has("from-winget") || args.Has("installed");
+        if (!batch)
+        {
+            var program = args.Get("app") ?? (args.Positional.Count >= 3 ? args.Positional[2] : null)
+                ?? throw new CliException(T("missing-option", "--app <Programm> | --from-oemproj <Datei> | --from-winget <Datei> | --installed"));
+            var moduleId = args.Get("id") ?? ModuleIds.FromName(program);
+            ProfilePackage.ValidateId(moduleId);
+            var session = PrepareSession();
+            if (session is null) return ExitCodes.Partial;
+            var fresh = DiscoverOne(session, program, args.Get("winget"), moduleId);
+            Console.WriteLine();
+            if (fresh.Count == 0) { Console.WriteLine(T("ai-no-proposal")); return ExitCodes.Partial; }
+            foreach (var p in fresh) PrintProposal(p);
+            return ExitCodes.Ok;
+        }
 
+        // ---- Stapelmodus
+        IReadOnlyList<SourcePackage> packages =
+            args.Get("from-oemproj") is { } oem ? PackageSources.FromOemProject(File.ReadAllText(oem))
+            : args.Get("from-winget") is { } wg ? PackageSources.FromWingetExport(File.ReadAllText(wg))
+            : PackageSources.FromInventory(new WingetClient().ListInstalled());
+
+        var skipFile = Path.Combine(AppContext.BaseDirectory, "rules", "no-settings.list");
+        var skip = File.Exists(skipFile) ? PackageSources.ParseSkipList(File.ReadAllText(skipFile)) : [];
+        var plan = BatchPlanner.Plan(packages, loadCatalog(), Proposals.List().Select(p => p.Rule.Id).ToList(), skip, args.Has("retry"));
+
+        Console.WriteLine(T("batch-plan", packages.Count));
+        foreach (var item in plan)
+            Console.WriteLine($"  {DecisionLabel(item.Decision),-22} {item.ModuleId,-24} {item.Package.WingetId ?? item.Package.Name}{(item.Detail is null ? "" : $"  ({item.Detail})")}");
+
+        var todo = plan.Where(i => i.Decision == BatchDecision.Discover).ToList();
+        if (args.Get("limit") is { } lim && int.TryParse(lim, out var limit)) todo = todo.Take(Math.Max(limit, 0)).ToList();
+        Console.WriteLine(T("batch-todo", todo.Count));
+        if (todo.Count == 0 || args.Has("dry-run")) return ExitCodes.Ok;
+
+        var s = PrepareSession();
+        if (s is null) return ExitCodes.Partial;
+
+        var results = new List<(BatchItem Item, string Outcome, bool Ok)>();
+        for (var i = 0; i < todo.Count; i++)
+        {
+            var item = todo[i];
+            Console.WriteLine();
+            Console.WriteLine(T("batch-item", i + 1, todo.Count, item.Package.Name));
+            try
+            {
+                var fresh = DiscoverOne(s, item.Package.Name, item.Package.WingetId, item.ModuleId);
+                foreach (var p in fresh) PrintProposal(p, brief: true);
+                results.Add(fresh.Count > 0 ? (item, T("batch-ok", string.Join(", ", fresh.Select(p => p.Rule.Id))), true) : (item, T("ai-no-proposal"), false));
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or HttpRequestException or TimeoutException or IOException or TaskCanceledException)
+            {
+                Console.Error.WriteLine(T("error", ex.Message));
+                results.Add((item, T("error", ex.Message), false));
+            }
+        }
+
+        Console.WriteLine();
+        Console.WriteLine(T("batch-summary", results.Count(r => r.Ok), results.Count));
+        foreach (var (item, outcome, ok) in results) Console.WriteLine($"  {(ok ? "✓" : "✗")} {item.ModuleId,-24} {outcome}");
+        Console.WriteLine(T("batch-next"));
+        return results.All(r => r.Ok) ? ExitCodes.Ok : ExitCodes.Partial;
+    }
+
+    private sealed record DiscoverSession(AiSettings Settings, ProviderChoice Choice, string? OpenRouterKey);
+
+    /// <summary>Wählt die KI-Stufe und holt ggf. die Zustimmung für OpenRouter ein; null = abgebrochen.</summary>
+    private DiscoverSession? PrepareSession()
+    {
         var settings = AiSettings.Load(SettingsPath);
         var needsOllama = (args.Get("provider") ?? settings.Provider) is AiProviders.Auto or AiProviders.Ollama;
         var ollama = needsOllama ? AiEnvironment.ProbeOllamaAsync(Http, settings.OllamaUrl, CancellationToken.None).GetAwaiter().GetResult() : null;
@@ -161,17 +224,23 @@ internal sealed class AiCommands(CliArgs args, Func<RuleCatalog> loadCatalog)
             if (!args.Has("accept-cloud"))
             {
                 Console.Error.WriteLine(T("ai-cloud-warning"));
-                return ExitCodes.Partial;
+                return null;
             }
             settings = settings with { OpenRouterConsent = true };
             settings.Save(SettingsPath);
             Console.WriteLine(T("ai-consent-saved"));
         }
-
         Console.WriteLine(T("ai-choice", choice.Provider, choice.Model is null ? "" : " · " + choice.Model, choice.Reason));
+        return new DiscoverSession(settings, choice, openRouterKey);
+    }
+
+    /// <summary>Lässt die KI ein Programm untersuchen; liefert die dabei gespeicherten Vorschläge.</summary>
+    private List<Proposal> DiscoverOne(DiscoverSession session, string program, string? wingetId, string moduleId)
+    {
         Console.WriteLine(T("ai-start", program, moduleId));
         var started = DateTimeOffset.UtcNow.AddSeconds(-1);
         var language = Language;
+        var choice = session.Choice;
 
         if (choice.Provider == AiProviders.ClaudeCode)
         {
@@ -186,12 +255,12 @@ internal sealed class AiCommands(CliArgs args, Func<RuleCatalog> loadCatalog)
         {
             using var user = UserTarget.OpenCurrent();
             IChatClient client = choice.Provider == AiProviders.Ollama
-                ? OpenAiCompatibleChatClient.ForOllama(Http, settings.OllamaUrl, choice.Model!)
-                : OpenAiCompatibleChatClient.ForOpenRouter(Http, openRouterKey!, choice.Model!);
+                ? OpenAiCompatibleChatClient.ForOllama(Http, session.Settings.OllamaUrl, choice.Model!)
+                : OpenAiCompatibleChatClient.ForOpenRouter(Http, session.OpenRouterKey!, choice.Model!);
             var context = CreateContext(user, client.Name);
             var runner = new AgentRunner(client, AgentTools.Create(context), context)
             {
-                MaxSteps = settings.MaxSteps,
+                MaxSteps = session.Settings.MaxSteps,
                 OnToolCall = (tool, arguments, error) =>
                     Console.WriteLine(T("ai-tool", tool, Shorten(arguments)) + (error ? "  ✗" : "")),
             };
@@ -202,12 +271,17 @@ internal sealed class AiCommands(CliArgs args, Func<RuleCatalog> loadCatalog)
             if (result.HitStepLimit) Console.Error.WriteLine(T("warning", T("ai-steplimit", result.Steps)));
         }
 
-        var fresh = Proposals.List().Where(p => p.CreatedUtc >= started).ToList();
-        Console.WriteLine();
-        if (fresh.Count == 0) { Console.WriteLine(T("ai-no-proposal")); return ExitCodes.Partial; }
-        foreach (var p in fresh) PrintProposal(p);
-        return ExitCodes.Ok;
+        return Proposals.List().Where(p => p.CreatedUtc >= started).ToList();
     }
+
+    private static string DecisionLabel(BatchDecision d) => d switch
+    {
+        BatchDecision.Discover => T("batch-discover"),
+        BatchDecision.HasRule => T("batch-hasrule"),
+        BatchDecision.HasProposal => T("batch-hasproposal"),
+        BatchDecision.NoSettings => T("batch-nosettings"),
+        _ => T("batch-conflict"),
+    };
 
     public int ProposalsList()
     {

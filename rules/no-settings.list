@@ -1,0 +1,22 @@
+# Pakete ohne eigene, übertragbare Einstellungen.
+# Der Stapelmodus von 'profilekit ai discover' überspringt sie.
+# Eine winget-ID je Zeile, '*' als Platzhalter, '#' für Kommentare.
+
+# Laufzeitumgebungen und Frameworks
+Microsoft.AppInstaller
+Microsoft.DotNet.*
+Microsoft.VCRedist.*
+Microsoft.UI.Xaml.*
+Microsoft.WindowsAppRuntime.*
+Microsoft.EdgeWebView2Runtime
+Oracle.JavaRuntimeEnvironment
+
+# Einstellungen liegen im Microsoft-Konto
+Microsoft.Outlook
+Microsoft.Teams
+
+# keine nennenswerten Einstellungen
+Google.QuickShare
+Microsoft.BingWallpaper
+CrystalRich.LockHunter
+ForensiT.Transwiz

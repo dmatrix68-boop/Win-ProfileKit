@@ -12,6 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Regelkatalog neben die EXE legen -->
-    <None Include="..\..\rules\**\*.json" LinkBase="rules" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="..\..\rules\**\*.json;..\..\rules\*.list" LinkBase="rules" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
   </ItemGroup>
 </Project>

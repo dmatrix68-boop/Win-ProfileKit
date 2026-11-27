@@ -36,6 +36,9 @@ internal static class HelpText
           ai discover --app <Programm> [--winget <id>] [--id <modul-id>]
                 [--provider auto|claude-code|ollama|openrouter] [--model <m>] [--accept-cloud]
                                           KI sucht die Einstellungen und legt einen Regelvorschlag ab
+          ai discover (--from-oemproj <Datei> | --from-winget <Datei> | --installed)
+                [--limit n] [--retry] [--dry-run]
+                                          Stapelmodus: alle Programme ohne Regel nacheinander untersuchen
           ai proposals [--show <id>]      offene Vorschläge anzeigen
           ai accept <id> [--force]        Vorschlag als Regel übernehmen
           ai reject <id>                  Vorschlag verwerfen
@@ -87,6 +90,9 @@ internal static class HelpText
           ai discover --app <program> [--winget <id>] [--id <module-id>]
                 [--provider auto|claude-code|ollama|openrouter] [--model <m>] [--accept-cloud]
                                           the AI looks for the settings and stores a rule proposal
+          ai discover (--from-oemproj <file> | --from-winget <file> | --installed)
+                [--limit n] [--retry] [--dry-run]
+                                          batch mode: examine every program without a rule in turn
           ai proposals [--show <id>]      list open proposals
           ai accept <id> [--force]        accept a proposal as rule
           ai reject <id>                  discard a proposal

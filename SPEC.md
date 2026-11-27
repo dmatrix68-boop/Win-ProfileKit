@@ -227,6 +227,11 @@ Der Agent kann keine Dateien schreiben, löschen oder Programme starten.
   (Ollama `…/v1`, OpenRouter), max. 30 Schritte (einstellbar), eine Erinnerung, falls das Modell
   ohne Vorschlag aufhört. Modelle werden live abgefragt (`profilekit ai models`), keines ist fest
   verdrahtet; OpenRouter-Modelle werden auf Tool-Unterstützung gefiltert.
+* Stapelmodus: `ai discover --from-oemproj <Datei> | --from-winget <Datei> | --installed` untersucht
+  nacheinander alle Pakete ohne Regel und ohne offenen Vorschlag. Übersprungen werden außerdem
+  Pakete aus `rules/no-settings.list` (Laufzeitumgebungen, Konto-Apps) und Modul-ID-Konflikte.
+  Aus der OEM-Projektdatei werden nur `apps.items` gelesen; winget-IDs nur für Manager/Quelle winget.
+  `--dry-run` zeigt nur den Plan, `--limit n` begrenzt die Anzahl, `--retry` wiederholt offene Vorschläge.
 * Einstellungen in `%LOCALAPPDATA%\Win-ProfileKit\ai.json`, OpenRouter-Key in der
   Windows-Anmeldeinformationsverwaltung (`Win-ProfileKit/OpenRouter`). Vor der ersten Nutzung von
   OpenRouter ist eine ausdrückliche Zustimmung nötig (`--accept-cloud`), widerrufbar.
@@ -284,6 +289,7 @@ profilekit learn diff
 profilekit learn stop --id <modul-id> [--name <Programm>] [--winget <id>] [--out <Datei>] [--force]
 profilekit ai status | models | config | key set|remove
 profilekit ai discover --app <Programm> [--winget <id>] [--id <modul-id>] [--provider …] [--model …]
+profilekit ai discover (--from-oemproj <Datei> | --from-winget <Datei> | --installed) [--limit n] [--retry] [--dry-run]
 profilekit ai proposals [--show <id>] | accept <id> | reject <id>
 profilekit mcp | mcp install [--uninstall] | mcp config
 Global: --lang de|en, --rules <Ordner>, --verbose
