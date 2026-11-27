@@ -24,6 +24,12 @@ internal static class HelpText
                                           Profil anwenden; --install installiert fehlende Programme
           user create <Name> [--admin] [--password-stdin]
                                           lokalen Benutzer anlegen und Profil sofort erzeugen
+          learn start [--machine] [--exclude <Muster;Muster>]
+                                          Lernmodus: Momentaufnahme vor dem Ändern der Einstellungen
+          learn diff                      bisherige Änderungen anzeigen (Sitzung läuft weiter)
+          learn stop --id <modul-id> [--name <Programm>] [--winget <winget-id>] [--out <datei>] [--force]
+                                          Änderungen auswerten und als Regel speichern
+                                          (Standard: %LOCALAPPDATA%\Win-ProfileKit\rules)
 
         Global:
           --lang de|en       Sprache (Standard: Systemsprache, auch PROFILEKIT_LANG)
@@ -51,6 +57,12 @@ internal static class HelpText
                                           apply a profile; --install installs missing programs
           user create <name> [--admin] [--password-stdin]
                                           create a local user and its profile right away
+          learn start [--machine] [--exclude <pattern;pattern>]
+                                          learning mode: snapshot before changing the settings
+          learn diff                      show changes so far (session keeps running)
+          learn stop --id <module-id> [--name <program>] [--winget <winget-id>] [--out <file>] [--force]
+                                          evaluate the changes and save them as a rule
+                                          (default: %LOCALAPPDATA%\Win-ProfileKit\rules)
 
         Global:
           --lang de|en       language (default: system language, also PROFILEKIT_LANG)

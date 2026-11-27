@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using ProfileKit.Core.Catalog;
+using ProfileKit.Core.Learning;
 using ProfileKit.Core.Model;
 using ProfileKit.Core.Packaging;
 using ProfileKit.Core.Paths;
@@ -269,6 +270,96 @@ internal sealed class Commands(CliArgs args)
                 return UserTarget.OpenUser(args.Require("user"), writable);
         }
     }
+
+    // ---------------------------------------------------------------- learn
+
+    private static string LocalAppData => Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
+    private string SessionPath => args.Get("session") ?? LearnSession.DefaultPath(LocalAppData);
+
+    public int LearnStart()
+    {
+        var scope = LearnScope.Default;
+        if (args.Has("machine")) scope = scope.WithMachineScope();
+        scope = scope.WithExtraNoise(SplitList(args.Get("exclude")));
+
+        using var user = UserTarget.OpenCurrent();
+        Console.WriteLine(T("learn-scanning", user.Describe()));
+        var before = new SnapshotService().Take(user.Context, user.Registry, scope);
+        new LearnSession { Scope = scope, Before = before }.Save(SessionPath);
+        Console.WriteLine(T("learn-started", before.Files.Count, before.RegistryValueCount));
+        return ExitCodes.Ok;
+    }
+
+    public int LearnDiff()
+    {
+        var diff = ComputeLearnDiff(out _);
+        if (diff is null) return ExitCodes.Error;
+        PrintDiff(diff);
+        return ExitCodes.Ok;
+    }
+
+    public int LearnStop()
+    {
+        var id = args.Require("id");
+        ProfilePackage.ValidateId(id);
+        var name = args.Get("name") ?? id;
+
+        var target = args.Get("out") ?? Path.Combine(LocalAppData, "Win-ProfileKit", "rules", id + ".json");
+        var existing = LoadCatalog().Find(id);
+        if ((existing is not null || File.Exists(target)) && !args.Has("force"))
+            throw new CliException(T("learn-exists", id, existing?.DisplayName ?? target));
+
+        var diff = ComputeLearnDiff(out _);
+        if (diff is null) return ExitCodes.Error;
+        PrintDiff(diff);
+        if (diff.Files.All(f => f.Kind == ChangeKind.Removed) && diff.Registry.All(r => r.Kind == ChangeKind.Removed))
+        {
+            Console.WriteLine(T("learn-empty"));
+            return ExitCodes.Partial;
+        }
+
+        var rule = RuleProposer.Propose(diff, id, name, args.Get("winget"));
+        RuleCatalog.Validate(rule);
+        Json.Write(target, rule);
+        Console.WriteLine();
+        Console.WriteLine(T("learn-proposal"));
+        Console.WriteLine(File.ReadAllText(target).TrimEnd());
+        Console.WriteLine();
+        Console.WriteLine(T("learn-written", target));
+        return ExitCodes.Ok;
+    }
+
+    private SnapshotDiff? ComputeLearnDiff(out LearnSession? session)
+    {
+        session = LearnSession.TryLoad(SessionPath);
+        if (session is null)
+        {
+            Console.Error.WriteLine(T("learn-no-session"));
+            return null;
+        }
+        using var user = UserTarget.OpenCurrent();
+        Console.WriteLine(T("learn-scanning", user.Describe()));
+        var after = new SnapshotService().Take(user.Context, user.Registry, session.Scope);
+        return SnapshotDiff.Compare(session.Before, after);
+    }
+
+    private void PrintDiff(SnapshotDiff diff)
+    {
+        var limit = args.Has("verbose") ? int.MaxValue : 40;
+        static string Mark(ChangeKind k) => k switch { ChangeKind.Added => "+", ChangeKind.Removed => "-", _ => "~" };
+
+        Console.WriteLine(T("learn-files", diff.Files.Count));
+        foreach (var f in diff.Files.Take(limit)) Console.WriteLine($"  {Mark(f.Kind)} {f.Path}");
+        if (diff.Files.Count > limit) Console.WriteLine(T("learn-more", diff.Files.Count - limit));
+
+        Console.WriteLine(T("learn-registry", diff.Registry.Count));
+        foreach (var r in diff.Registry.Take(limit)) Console.WriteLine($"  {Mark(r.Kind)} {r.FullName}");
+        if (diff.Registry.Count > limit) Console.WriteLine(T("learn-more", diff.Registry.Count - limit));
+    }
+
+    private static IEnumerable<string> SplitList(string? value) =>
+        (value ?? string.Empty).Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
     // ---------------------------------------------------------- user create
 

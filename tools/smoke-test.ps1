@@ -89,5 +89,26 @@ finally {
 Invoke-Pk @('apply', '--profile', $profileDir, '--default-user', '--only', 'windows.clipboard', '--no-backup') -Allowed 0,2
 Invoke-Pk @('apply', '--profile', $profileDir, '--current-user', '--only', 'smoke.test', '--dry-run')
 
+# --- Lernmodus ------------------------------------------------------------------------
+$session = Join-Path $Work 'learn-session.json'
+$learned = Join-Path $Work 'learned.json'
+Invoke-Pk @('learn', 'start', '--session', $session)
+$learnDir = Join-Path $env:APPDATA 'ProfileKitLearn'
+New-Item (Join-Path $learnDir 'profiles') -ItemType Directory -Force | Out-Null
+Set-Content (Join-Path $learnDir 'settings.ini') 'theme=dark' -Encoding UTF8
+Set-Content (Join-Path $learnDir 'profiles\default.json') '{}' -Encoding UTF8
+New-Item 'HKCU:\Software\ProfileKitLearn\Window' -Force | Out-Null
+Set-ItemProperty 'HKCU:\Software\ProfileKitLearn\Window' -Name Width -Value 1234 -Type DWord
+Invoke-Pk @('learn', 'diff', '--session', $session)
+Invoke-Pk @('learn', 'stop', '--session', $session, '--id', 'smoke.learned', '--name', 'Gelernt', '--winget', 'Test.Learned', '--out', $learned)
+if (Test-Path $learned) {
+    $rule = Get-Content $learned -Raw | ConvertFrom-Json
+    Assert-True ($rule.files.path -contains '%APPDATA%\ProfileKitLearn') "Lernmodus: Ordner erkannt ($($rule.files.path -join ', '))"
+    Assert-True ($rule.registry.key -contains 'HKCU\Software\ProfileKitLearn\Window') "Lernmodus: Registry erkannt ($($rule.registry.key -join ', '))"
+    Assert-True ($rule.origin -eq 'LearnMode') 'Lernmodus: Herkunft gesetzt'
+} else {
+    Assert-True $false 'Lernmodus: Regel geschrieben'
+}
+
 if ($failures -gt 0) { Write-Host "`n$failures Fehler" -ForegroundColor Red; exit 1 }
 Write-Host "`nAlle Smoke-Tests bestanden." -ForegroundColor Green

@@ -8,7 +8,7 @@ Benutzer** an – inklusive winget-Installation fehlender Programme. Gedacht fü
 Testbenutzer auf Installations-VMs und für den OEM-Skriptlauf
 ([OEM-script-gen](https://github.com/dmatrix68-boop/OEM-script-gen)).
 
-> Status: Phase 1 (Core + CLI). KI-Regelermittlung, Lernmodus und WinUI-Oberfläche
+> Status: Phase 1 (Core + CLI) und Lernmodus. KI-Regelermittlung und WinUI-Oberfläche
 > folgen – siehe [SPEC.md](SPEC.md).
 
 ## Funktionen (Phase 1)
@@ -23,6 +23,9 @@ Testbenutzer auf Installations-VMs und für den OEM-Skriptlauf
 * **Anwenden** auf den aktuellen Benutzer, einen anderen Benutzer (auch abgemeldet – der Hive
   wird offline geladen), das Default-Profil oder einen **neu angelegten** Benutzer.
   Profilpfade in Dateien und Registry-Werten werden auf den Zielbenutzer umgeschrieben.
+* **Lernmodus**: `learn start` → Einstellungen im Programm ändern → `learn stop --id <modul>`
+  erzeugt aus dem Vorher/Nachher-Vergleich eine Regel (Rauschen wie Caches, Logs und MRU-Listen
+  wird herausgefiltert).
 * **winget**: fehlende Programme vor dem Konfigurieren installieren (`--install`).
 * **Sicherung** vorhandener Dateien und Werte vor dem Überschreiben, **Trockenlauf** mit `--dry-run`.
 * Zweisprachig (DE/EN), Profil als Ordner oder `.pkprofile`-Archiv.
@@ -41,6 +44,14 @@ profilekit apply --profile \\nas\profile\Dev --create-user test1 --admin --insta
 
 :: im OEM-Lauf (Phase 2, Benutzerkontext)
 profilekit apply --profile C:\Install\ProfileKit\Profiles\Dev --current-user --install
+```
+
+Regel für ein neues Programm lernen:
+
+```bat
+profilekit learn start
+:: … Programm öffnen, Einstellungen ändern, Programm schließen …
+profilekit learn stop --id wiztree --name WizTree --winget AntibodySoftware.WizTree
 ```
 
 Alle Befehle: `profilekit help`.

@@ -66,6 +66,16 @@ public static class Localizer
         ["target-default"] = "Default-Profil (gilt für neue Benutzer)",
         ["live-applied"] = "Einstellungen für den angemeldeten Benutzer aktiviert: {0}",
         ["archive-written"] = "Archiv geschrieben: {0}",
+        ["learn-scanning"] = "Erstelle Momentaufnahme von {0} …",
+        ["learn-started"] = "Momentaufnahme: {0} Dateien, {1} Registry-Werte. Ändere jetzt die Einstellungen im Programm, schließe es und rufe dann auf:\n  profilekit learn stop --id <modul-id> --name \"<Programm>\" [--winget <winget-id>]",
+        ["learn-no-session"] = "Keine laufende Lernsitzung – zuerst 'profilekit learn start'.",
+        ["learn-files"] = "Geänderte Dateien ({0}):",
+        ["learn-registry"] = "Geänderte Registry-Werte ({0}):",
+        ["learn-more"] = "  … und {0} weitere (--verbose zeigt alle)",
+        ["learn-empty"] = "Keine Änderungen gefunden. Wurden die Einstellungen gespeichert (Programm geschlossen)?",
+        ["learn-proposal"] = "Regelvorschlag:",
+        ["learn-written"] = "Regel gespeichert: {0}\nBitte prüfen und bei Bedarf anpassen – sie ist ab sofort im Katalog (profilekit catalog).",
+        ["learn-exists"] = "Es gibt bereits eine Regel '{0}' ({1}). Mit --force überschreiben oder andere --id wählen.",
     };
 
     private static readonly Dictionary<string, string> En = new()
@@ -106,5 +116,15 @@ public static class Localizer
         ["target-default"] = "Default profile (applies to new users)",
         ["live-applied"] = "Settings activated for the logged-on user: {0}",
         ["archive-written"] = "Archive written: {0}",
+        ["learn-scanning"] = "Taking snapshot of {0} …",
+        ["learn-started"] = "Snapshot: {0} files, {1} registry values. Now change the settings in the program, close it and then run:\n  profilekit learn stop --id <module-id> --name \"<program>\" [--winget <winget-id>]",
+        ["learn-no-session"] = "No learning session running – run 'profilekit learn start' first.",
+        ["learn-files"] = "Changed files ({0}):",
+        ["learn-registry"] = "Changed registry values ({0}):",
+        ["learn-more"] = "  … and {0} more (--verbose shows all)",
+        ["learn-empty"] = "No changes found. Were the settings saved (program closed)?",
+        ["learn-proposal"] = "Proposed rule:",
+        ["learn-written"] = "Rule saved: {0}\nPlease review and adjust it if needed – it is part of the catalog right away (profilekit catalog).",
+        ["learn-exists"] = "A rule '{0}' already exists ({1}). Use --force to overwrite or choose another --id.",
     };
 }

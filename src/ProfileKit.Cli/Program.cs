@@ -37,6 +37,13 @@ try
         "capture" => commands.Capture(),
         "info" => commands.Info(),
         "apply" => commands.Apply(),
+        "learn" when cli.Positional.Count >= 2 => cli.Positional[1].ToLowerInvariant() switch
+        {
+            "start" => commands.LearnStart(),
+            "diff" => commands.LearnDiff(),
+            "stop" => commands.LearnStop(),
+            _ => throw new CliException(Localizer.T("unknown-command", "learn " + cli.Positional[1])),
+        },
         "user" when cli.Positional.Count >= 2 && cli.Positional[1] is "create" => commands.CreateUser(),
         _ => throw new CliException(Localizer.T("unknown-command", cli.Positional[0])),
     };

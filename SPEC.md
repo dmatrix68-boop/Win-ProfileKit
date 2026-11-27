@@ -158,6 +158,17 @@ Drei Wege, alle erzeugen dasselbe Regelformat (`module.json`):
 1. **Katalog** – mitgelieferte Regeln in `rules/`, per winget-ID zugeordnet.
 2. **Lernmodus** – Momentaufnahme von HKCU und den AppData-Ordnern, Benutzer ändert
    Einstellungen, zweite Momentaufnahme, Differenz → Regelvorschlag.
+   * Beobachtet: `%APPDATA%`, `%LOCALAPPDATA%`, `%LOCALAPPDATALOW%`, Dateien und Punkt-Ordner
+     direkt in `%USERPROFILE%`, `HKCU\Software`, `HKCU\Control Panel`; mit `--machine` zusätzlich
+     Programmordner, `%PROGRAMDATA%` und `HKLM\SOFTWARE`.
+   * Der Snapshot speichert nur Größe/Zeitstempel und einen Hash der Registry-Daten, keine Inhalte.
+   * Bekanntes Rauschen (Temp, Caches, Logs, UserAssist, MRU-Listen, CloudStore …) wird ignoriert;
+     eigene Ausschlüsse mit `--exclude`.
+   * Vorschlag: geänderte Dateien werden je Programm zum gemeinsamen Ordner zusammengefasst
+     (mindestens Hersteller-Ebene); Herstellerschlüssel werden als ganzer Schlüssel übernommen,
+     gemeinsam genutzte Windows-Schlüssel (`Control Panel`, `Software\Microsoft\Windows` …) nur mit
+     den geänderten Werten. Gelöschte Einträge erzeugen keine Regel.
+   * Die Regel landet in `%LOCALAPPDATA%\Win-ProfileKit\rules` und ist sofort Teil des Katalogs.
 3. **KI-Agent** – sucht Speicherorte, liest bei Bedarf Dateiinhalte, schlägt Regel vor.
 
 **Grundsatz: Die KI schlägt vor, der Core prüft und führt aus.** Jeder Vorschlag wird
@@ -240,6 +251,9 @@ profilekit apply    --profile <Ordner>
                     (--current-user | --user <Name> | --default-user | --create-user <Name>)
                     [--install] [--only <muster>] [--dry-run] [--no-backup]
 profilekit user create <Name> [--admin] [--password-stdin]
+profilekit learn start [--machine] [--exclude <Muster;Muster>]
+profilekit learn diff
+profilekit learn stop --id <modul-id> [--name <Programm>] [--winget <id>] [--out <Datei>] [--force]
 Global: --lang de|en, --rules <Ordner>, --verbose
 ```
 
@@ -248,7 +262,7 @@ Global: --lang de|en, --rules <Ordner>, --verbose
 | Phase | Inhalt |
 |---|---|
 | **1** | Core, Windows-Schicht, CLI: Katalog, Inventar, Capture, Apply (alle Zielarten), Benutzer anlegen, Windows-Module, CI |
-| **2** | Lernmodus, Sammler über Freigabe, Offline-VHDX, Abgleich Quelle/Ziel |
+| **2** | Lernmodus ✅, Sammler über Freigabe, Offline-VHDX, Abgleich Quelle/Ziel |
 | **3** | MCP-Server, KI-Stufen 1a/1b/2/3, Regelvorschläge mit Validierung |
 | **4** | WinUI-3-Oberfläche (DE/EN) |
 | **5** | Integration in den OEM-Skriptgenerator (eigener PR dort) |
