@@ -81,7 +81,9 @@ catch (CliException ex)
 catch (UnauthorizedAccessException ex)
 {
     Console.Error.WriteLine(Localizer.T("error", ex.Message));
-    Console.Error.WriteLine(Localizer.T("needs-admin"));
+    // Der Hinweis auf Adminrechte hilft nur, wenn sie fehlen – sonst ist die Datei gesperrt oder geschützt.
+    Console.Error.WriteLine(Localizer.T(ProfileKit.Windows.UserProfiles.IsAdministrator() ? "access-denied-hint" : "needs-admin"));
+    if (cli.Has("verbose")) Console.Error.WriteLine(ex);
     return ExitCodes.Error;
 }
 catch (Exception ex) when (ex is IOException or ArgumentException or InvalidOperationException or InvalidDataException

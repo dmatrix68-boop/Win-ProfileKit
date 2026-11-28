@@ -6,6 +6,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net48</TargetFramework>
     <AssemblyName>profilekit-gui</AssemblyName>
+    <ApplicationIcon>..\..\assets\icon\profilekit.ico</ApplicationIcon>
     <RootNamespace>ProfileKit.Launcher</RootNamespace>
     <ImplicitUsings>disable</ImplicitUsings>
     <PlatformTarget>x64</PlatformTarget>

@@ -10,7 +10,9 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" MinHeight="160" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
@@ -20,7 +22,7 @@
         </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
-            <ComboBox x:Name="SourceBox" Header="{l:Loc Key=ui-capture-source}" MinWidth="240" />
+            <ComboBox x:Name="SourceBox" Header="{l:Loc Key=ui-capture-source}" MinWidth="240" SelectionChanged="Source_Changed" />
             <Button Content="{l:Loc Key=ui-select-all}" Click="SelectAll_Click" VerticalAlignment="Bottom" />
             <Button Content="{l:Loc Key=ui-select-none}" Click="SelectNone_Click" VerticalAlignment="Bottom" />
             <Button Content="{l:Loc Key=ui-select-windows}" Click="SelectWindows_Click" VerticalAlignment="Bottom" />
@@ -28,7 +30,13 @@
             <ProgressRing x:Name="InventoryRing" IsActive="False" Width="20" Height="20" VerticalAlignment="Bottom" />
         </StackPanel>
 
-        <Expander Grid.Row="2" Header="{l:Loc Key=ui-vhdx-header}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="12">
+            <CheckBox x:Name="FilterBox" Content="{l:Loc Key=ui-capture-filter}" IsChecked="True" Click="Filter_Click" />
+            <ProgressRing x:Name="ProbeRing" IsActive="False" Width="16" Height="16" />
+            <TextBlock x:Name="ProbeText" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+
+        <Expander Grid.Row="3" Header="{l:Loc Key=ui-vhdx-header}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
             <StackPanel Spacing="8">
                 <TextBlock Text="{l:Loc Key=ui-vhdx-text}" TextWrapping="Wrap" />
                 <Grid ColumnSpacing="8">
@@ -38,7 +46,7 @@
                         <ColumnDefinition Width="200" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBox x:Name="VhdxBox" Header="{l:Loc Key=ui-vhdx-file}" PlaceholderText="D:\Hyper-V\Test-VM\Virtual Hard Disks\Test-VM.vhdx" />
+                    <TextBox x:Name="VhdxBox" Header="{l:Loc Key=ui-vhdx-file}" PlaceholderText="D:\Hyper-V\Test-VM\Virtual Hard Disks\Test-VM.vhdx" LostFocus="Vhdx_LostFocus" />
                     <Button Grid.Column="1" Content="{l:Loc Key=ui-browse}" Click="BrowseVhdx_Click" VerticalAlignment="Bottom" />
                     <TextBox Grid.Column="2" x:Name="VhdxUserBox" Header="{l:Loc Key=ui-vhdx-user}" />
                     <Button Grid.Column="3" Content="{l:Loc Key=ui-vhdx-users}" Click="VhdxUsers_Click" VerticalAlignment="Bottom" />
@@ -46,36 +54,45 @@
             </StackPanel>
         </Expander>
 
-        <ListView x:Name="ModuleList" Grid.Row="3" SelectionMode="None" BorderThickness="1"
+        <ListView x:Name="ModuleList" Grid.Row="4" SelectionMode="None" BorderThickness="1"
                   BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="4">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="s:SelectableItem">
                     <CheckBox IsChecked="{x:Bind IsSelected, Mode=TwoWay}">
                         <StackPanel>
                             <TextBlock Text="{x:Bind Title}" />
-                            <TextBlock Text="{x:Bind Subtitle}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                <Run Text="{x:Bind Subtitle}" /><Run Text="{x:Bind Status, Mode=OneWay}" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            </TextBlock>
                         </StackPanel>
                     </CheckBox>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
 
-        <Grid Grid.Row="4" ColumnSpacing="8">
+        <Grid Grid.Row="5" ColumnSpacing="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="220" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="FolderBox" Header="{l:Loc Key=ui-capture-folder}" />
+            <TextBox x:Name="FolderBox" Header="{l:Loc Key=ui-capture-folder}" PlaceholderText="{l:Loc Key=ui-capture-folder-placeholder}" />
             <Button Grid.Column="1" Content="{l:Loc Key=ui-browse}" Click="Browse_Click" VerticalAlignment="Bottom" />
             <TextBox Grid.Column="2" x:Name="NameBox" Header="{l:Loc Key=ui-capture-name}" />
             <CheckBox Grid.Column="3" x:Name="ZipBox" Content="{l:Loc Key=ui-capture-zip}" VerticalAlignment="Bottom" />
-            <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
-                <Button Content="{l:Loc Key=ui-capture-start}" Click="Start_Click" Style="{StaticResource AccentButtonStyle}" />
-                <Button Content="{l:Loc Key=ui-capture-collect}" Click="Collect_Click" ToolTipService.ToolTip="{l:Loc Key=ui-capture-collect-hint}" />
-            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="6" ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button Content="{l:Loc Key=ui-capture-start}" Click="Start_Click" Style="{StaticResource AccentButtonStyle}" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1" Text="{l:Loc Key=ui-capture-network-hint}" TextWrapping="Wrap" FontSize="12"
+                       VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            <Button Grid.Column="2" Content="{l:Loc Key=ui-capture-collect}" Click="Collect_Click" ToolTipService.ToolTip="{l:Loc Key=ui-capture-collect-hint}" VerticalAlignment="Center" />
         </Grid>
     </Grid>
 </Page>

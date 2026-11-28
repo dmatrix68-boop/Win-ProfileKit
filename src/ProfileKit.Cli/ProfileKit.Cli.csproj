@@ -5,6 +5,7 @@
     <RootNamespace>ProfileKit.Cli</RootNamespace>
     <AssemblyName>profilekit</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\..\assets\icon\profilekit.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ProfileKit.Core\ProfileKit.Core.csproj" />

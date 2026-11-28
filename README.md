@@ -14,8 +14,8 @@ Testbenutzer auf Installations-VMs und für den OEM-Skriptlauf
 ## Funktionen (Phase 1)
 
 * **Regelkatalog** (`rules/`): je Programm, welche Dateien und Registry-Schlüssel dazugehören –
-  aktuell 29 Programme (u. a. PowerToys, Windows Terminal, Total Commander und WinRAR inkl.
-  Keyfile, Everything, XnView MP, VLC, HandBrake, Ditto, RustDesk, UniGetUI) und Windows-Module
+  aktuell 30 Programme (u. a. PowerToys, Windows Terminal, Total Commander und WinRAR inkl.
+  Keyfile, Everything, XnView MP, VLC, HandBrake, Ditto, RustDesk, UniGetUI, Windhawk) und Windows-Module
   für Maus, Design, Zwischenablageverlauf, Explorer und Taskleiste. Noch offene Programme:
   [rules/KANDIDATEN.md](rules/KANDIDATEN.md).
 * **Erfassen** vom aktuellen oder einem anderen Benutzer; Pfade werden neutral gespeichert
@@ -38,11 +38,14 @@ Testbenutzer auf Installations-VMs und für den OEM-Skriptlauf
 ## Oberfläche
 
 `profilekit-gui.exe` (WinUI 3) bietet dieselben Funktionen mit Fenstern: Profil erfassen
-(Programme ankreuzen, „Installierte markieren“), Profil anwenden (aktueller, anderer, neuer Benutzer
+(Programme ankreuzen, „Installierte markieren“; die Liste zeigt je Quelle nur Programme, zu denen dort
+Einstellungen existieren), Sammeln aller installierten Programme – auch direkt auf eine Netzwerkfreigabe
+(`\\NAS\Profile\…` als Zielordner), Profil anwenden (aktueller, anderer, neuer Benutzer
 oder Default-Profil, mit Trockenlauf), Lernmodus, KI-Suche mit Stapelmodus und Vorschlagsliste sowie
 die Einstellungen für KI-Stufen, OpenRouter-Key und Claude Desktop. Alle Aktionen laufen über
 `profilekit.exe`, deren Ausgabe im Protokoll unten erscheint. Ohne Administratorrechte bietet die
-Oberfläche einen Neustart als Administrator an.
+Oberfläche einen Neustart als Administrator an. Fensterposition und -größe bleiben zwischen den Starts
+erhalten. Das Programmsymbol liegt als SVG in `assets/icon/`; `node tools/make-icon.js` erzeugt daraus die `.ico`.
 
 ## Download
 

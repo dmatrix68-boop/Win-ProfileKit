@@ -30,10 +30,19 @@ public sealed class SelectableItem : INotifyPropertyChanged
     public required string Title { get; init; }
     public string? Subtitle { get; init; }
 
+    private string _status = string.Empty;
+
     public bool IsSelected
     {
         get => _isSelected;
         set { if (_isSelected != value) { _isSelected = value; OnChanged(); } }
+    }
+
+    /// <summary>Zusatzinfo, die sich ändern kann (z. B. „Einstellungen vorhanden“ je nach Quelle).</summary>
+    public string Status
+    {
+        get => _status;
+        set { if (_status != value) { _status = value; OnChanged(); } }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
