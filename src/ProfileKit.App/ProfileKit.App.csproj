@@ -8,6 +8,7 @@
     <RootNamespace>ProfileKit.App</RootNamespace>
     <AssemblyName>profilekit-gui</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\..\assets\icon\profilekit.ico</ApplicationIcon>
     <Platforms>x64</Platforms>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
@@ -28,5 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\rules\**\*.json;..\..\rules\*.list" LinkBase="rules" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- Fenstersymbol (AppWindow.SetIcon braucht eine Datei) -->
+    <None Include="..\..\assets\icon\profilekit.ico" Link="profilekit.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

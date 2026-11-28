@@ -6,7 +6,9 @@
 param(
     [Parameter(Mandatory)] [string] $Exe,
     [int] $Seconds = 20,
-    [switch] $Launcher
+    [switch] $Launcher,
+    # z. B. '--page capture': Seite direkt öffnen, damit auch deren Laden geprüft wird
+    [string] $Arguments
 )
 $ErrorActionPreference = 'Stop'
 $exePath = (Resolve-Path $Exe).Path
@@ -19,7 +21,8 @@ foreach ($f in @('profilekit.exe', 'rules\apps\7zip.json', 'rules\no-settings.li
 }
 
 $start = Get-Date
-$proc = Start-Process -FilePath $exePath -PassThru -WorkingDirectory $exeDir
+$proc = if ($Arguments) { Start-Process -FilePath $exePath -ArgumentList $Arguments -PassThru -WorkingDirectory $exeDir }
+        else { Start-Process -FilePath $exePath -PassThru -WorkingDirectory $exeDir }
 if ($Launcher) {
     $null = $proc.Handle
     if (-not $proc.WaitForExit(120000)) { Write-Host 'Starter hat sich nicht beendet.' -ForegroundColor Red; exit 1 }

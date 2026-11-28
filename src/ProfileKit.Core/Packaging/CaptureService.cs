@@ -18,7 +18,7 @@ public sealed class CaptureService
         ProfilePackage.ValidateId(rule.Id);
         var warnings = new List<string>();
         var moduleDir = package.ModuleDirectory(rule.Id);
-        if (Directory.Exists(moduleDir)) Directory.Delete(moduleDir, recursive: true);
+        FileSystem.DeleteDirectory(moduleDir);
         Directory.CreateDirectory(moduleDir);
 
         var excludes = new ExcludeSet(rule.Excludes);

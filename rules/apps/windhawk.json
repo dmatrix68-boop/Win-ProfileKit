@@ -1,0 +1,15 @@
+{
+  "id": "windhawk",
+  "displayName": "Windhawk",
+  "wingetId": "RamenSoftware.Windhawk",
+  "files": [
+    { "path": "%PROGRAMDATA%\\Windhawk" }
+  ],
+  "registry": [
+    { "key": "HKLM\\SOFTWARE\\Windhawk" }
+  ],
+  "excludes": [ "UIData\\**", "**\\*.log", "**\\*.tmp" ],
+  "processes": [ "windhawk" ],
+  "origin": "Catalog",
+  "notes": "Quelle: Windhawk-Dokumentation und windhawk.ini der Standardinstallation ([Storage] AppDataPath=%ProgramData%\\Windhawk, RegistryKey=HKLM\\SOFTWARE\\Windhawk). Maschinenweit: In %PROGRAMDATA%\\Windhawk liegen die installierten Mods (ModsSource = Quelltext, Engine\\Mods = kompilierte DLLs, Engine\\ModsWritable = Daten der Mods), in HKLM\\SOFTWARE\\Windhawk\\Engine\\Mods\\<Mod> je Mod aktiviert/deaktiviert, Version, Bibliothek und unter Settings die Mod-Einstellungen. Schreiben braucht Adminrechte und wirkt für alle Benutzer; Windhawk danach neu starten. Nicht übernommen: UIData (Editor-Daten und Caches der eingebauten VSCodium-Oberfläche), Logs. Die portable Variante (Daten im Programmordner) wird nicht unterstützt. Auf einem echten System noch nicht geprüft – bei Abweichungen per Lernmodus nachschärfen."
+}
